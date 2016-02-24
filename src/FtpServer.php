@@ -47,6 +47,11 @@ class FtpServer implements Server
 		}
 	}
 
+	public function rename(string $originalPath, string $newPath)
+	{
+		$this->ftp('rename', [$originalPath, $newPath]);
+	}
+
 	public function remove(string $remotePath)
 	{
 		$this->ftp('delete', [$remotePath]);

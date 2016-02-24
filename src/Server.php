@@ -14,6 +14,8 @@ interface Server
 
 	public function write(string $remotePath, string $localPath);
 
+	public function rename(string $originalPath, string $newPath);
+
 	public function remove(string $remotePath);
 
 }
