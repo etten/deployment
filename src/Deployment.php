@@ -43,10 +43,10 @@ class Deployment
 	public function run()
 	{
 		$localFiles = $this->collector->collect();
-		$deployedFiles = $this->readFileList();
+		$deployedFiles = $this->readFileList($this->config['deployedFile']);
 
 		$this->uploadFiles($this->filterFiles($localFiles, $deployedFiles));
-		$this->writeFileList($localFiles);
+		$this->writeFileList($this->config['deployedFile'], $localFiles);
 	}
 
 	private function filterFiles(array $newFiles, array $existingFiles):array
@@ -70,14 +70,14 @@ class Deployment
 		}
 	}
 
-	private function readFileList():array
+	private function readFileList(string $file):array
 	{
 		$tempFile = tmpfile();
 		$tempFilePath = stream_get_meta_data($tempFile)['uri'];
 
 		try {
 			$this->server->read(
-				$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile']),
+				$this->mergePaths($this->getRemoteBasePath(), $file),
 				$tempFilePath
 			);
 
@@ -87,7 +87,7 @@ class Deployment
 		}
 	}
 
-	private function writeFileList(array $files)
+	private function writeFileList(string $file, array $files)
 	{
 		$tempFile = tmpfile();
 		$tempFilePath = stream_get_meta_data($tempFile)['uri'];
@@ -95,7 +95,7 @@ class Deployment
 		$this->fileList->write($tempFilePath, $files);
 
 		$this->server->write(
-			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
+			$this->mergePaths($this->getRemoteTempPath(), $file),
 			$tempFilePath
 		);
 	}
