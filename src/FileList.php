@@ -7,7 +7,7 @@
 
 namespace Etten\Deployment;
 
-class DeployedList
+class FileList
 {
 
 	public function write(string $file, array $files)

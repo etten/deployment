@@ -25,28 +25,28 @@ class Deployment
 	/** @var Collector */
 	private $collector;
 
-	/** @var DeployedList */
-	private $deployedList;
+	/** @var FileList */
+	private $fileList;
 
 	public function __construct(
 		array $config,
 		Server $server,
 		Collector $collector,
-		DeployedList $deployedList
+		FileList $fileList
 	) {
 		$this->config = array_merge($this->config, $config);
 		$this->server = $server;
 		$this->collector = $collector;
-		$this->deployedList = $deployedList;
+		$this->fileList = $fileList;
 	}
 
 	public function run()
 	{
 		$localFiles = $this->collector->collect();
-		$deployedFiles = $this->readDeployedList();
+		$deployedFiles = $this->readFileList();
 
 		$this->uploadFiles($this->filterFiles($localFiles, $deployedFiles));
-		$this->writeDeployedList($localFiles);
+		$this->writeFileList($localFiles);
 	}
 
 	private function filterFiles(array $newFiles, array $existingFiles):array
@@ -70,7 +70,7 @@ class Deployment
 		}
 	}
 
-	private function readDeployedList():array
+	private function readFileList():array
 	{
 		$tempFile = tmpfile();
 		$tempFilePath = stream_get_meta_data($tempFile)['uri'];
@@ -81,18 +81,18 @@ class Deployment
 				$tempFilePath
 			);
 
-			return $this->deployedList->read($tempFilePath);
+			return $this->fileList->read($tempFilePath);
 		} catch (FtpException $e) {
 			return [];
 		}
 	}
 
-	private function writeDeployedList(array $files)
+	private function writeFileList(array $files)
 	{
 		$tempFile = tmpfile();
 		$tempFilePath = stream_get_meta_data($tempFile)['uri'];
 
-		$this->deployedList->write($tempFilePath, $files);
+		$this->fileList->write($tempFilePath, $files);
 
 		$this->server->write(
 			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),

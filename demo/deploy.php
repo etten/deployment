@@ -22,7 +22,7 @@ $config = [
 
 $server = new Deployment\FtpServer($config['server']);
 $collector = new Deployment\FileCollector($config['collector']);
-$deployedList = new Deployment\DeployedList();
+$deployedList = new Deployment\FileList();
 
 $deployment = new Deployment\Deployment($config['deployment'], $server, $collector, $deployedList);
 $deployment->run();
