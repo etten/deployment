@@ -128,6 +128,9 @@ class FtpServer implements Server
 
 	private function writeFile(string $remotePath, string $localPath)
 	{
+		$parts = explode('/', $remotePath);
+		$this->writeDirectory(implode('/', array_slice($parts, 0, count($parts) - 1)));
+
 		$blocks = 0;
 		do {
 			$ret = $blocks === 0
