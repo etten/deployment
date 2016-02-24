@@ -13,8 +13,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^5.1",
+        "mikey179/vfsStream": "^1.6",
         "squizlabs/php_codesniffer": "^2.5",
-        "artfocus/codestyle": "^2.0"
+        "artfocus/codestyle": "^2.0",
+        "symfony/console": "^2.8"
     },
     "autoload": {
         "psr-4": {
