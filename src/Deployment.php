@@ -42,28 +42,21 @@ class Deployment
 
 	public function run()
 	{
-		$files = $this->getFilesToDeploy();
-
-		$this->uploadFiles($files);
-		$this->writeDeployedList($files);
-	}
-
-	private function getFilesToDeploy():array
-	{
 		$localFiles = $this->collector->collect();
 		$deployedFiles = $this->readDeployedList();
 
-		return $this->filterDeployedFiles($localFiles, $deployedFiles);
+		$this->uploadFiles($this->filterFiles($localFiles, $deployedFiles));
+		$this->writeDeployedList($localFiles);
 	}
 
-	private function filterDeployedFiles(array $localFiles, array $deployedFiles):array
+	private function filterFiles(array $newFiles, array $existingFiles):array
 	{
-		return array_filter($localFiles, function ($value, $key) use ($deployedFiles) {
-			if (!isset($deployedFiles[$key])) {
+		return array_filter($newFiles, function ($value, $key) use ($existingFiles) {
+			if (!isset($existingFiles[$key])) {
 				return TRUE;
 			}
 
-			return $value !== $deployedFiles[$key];
+			return $value !== $existingFiles[$key];
 		}, ARRAY_FILTER_USE_BOTH);
 	}
 
