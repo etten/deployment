@@ -13,13 +13,13 @@ $config = [
 		'secured' => FALSE,
 	],
 	'collector' => [
-		'basePath' => __DIR__ . '/../',
+		'path' => __DIR__ . '/../',
 		'ignore' => [],
 	],
 ];
 
 $server = new Deployment\FtpServer($config['server']);
-$collector = new Deployment\FileCollector($config['collector']['basePath'], $config['collector']['ignore']);
+$collector = new Deployment\FileCollector($config['collector']['path'], $config['collector']['ignore']);
 
 $deployment = new Deployment\Deployment($server, $collector);
 $deployment->run();

@@ -44,7 +44,7 @@ class FtpServer implements Server
 		$this->ftp('pasv', [$this->config['passive']]);
 
 		if (isset($this->config['path'])) {
-			$this->ftp('chdir', [$this->config['path']]);
+			$this->writeDirectory([$this->config['path']]);
 		}
 	}
 
