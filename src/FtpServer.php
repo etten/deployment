@@ -7,6 +7,9 @@
 
 namespace Etten\Deployment;
 
+use Etten\Deployment\Exceptions\Exception;
+use Etten\Deployment\Exceptions\FtpException;
+
 class FtpServer implements Server
 {
 
@@ -26,7 +29,7 @@ class FtpServer implements Server
 	public function __construct(array $config)
 	{
 		if (!extension_loaded('ftp')) {
-			throw new \Exception('PHP extension FTP is not loaded.');
+			throw new Exception('PHP extension FTP is not loaded.');
 		}
 
 		$this->config = array_merge($this->config, $config);
@@ -61,7 +64,7 @@ class FtpServer implements Server
 	 * @param string $command FTP command name
 	 * @param array $args
 	 * @return mixed
-	 * @throws \Exception
+	 * @throws FtpException
 	 */
 	private function ftp($command, array $args = [])
 	{
@@ -90,7 +93,7 @@ class FtpServer implements Server
 	 * @param string $command
 	 * @param array $args
 	 * @return mixed
-	 * @throws \Exception
+	 * @throws FtpException
 	 */
 	private function protect($command, array $args = [])
 	{
@@ -100,7 +103,7 @@ class FtpServer implements Server
 				$message = $m[1];
 			}
 
-			throw new \Exception($message);
+			throw new FtpException($message);
 		});
 
 		$res = call_user_func_array($command, $args);
@@ -120,7 +123,7 @@ class FtpServer implements Server
 				if ($path !== '') {
 					$this->ftp('mkdir', [$path]);
 				}
-			} catch (\Exception $e) {
+			} catch (FtpException $e) {
 				// Ignore error when directory already exists
 				if (strpos($e->getMessage(), 'File exists') === FALSE) {
 					throw $e;
