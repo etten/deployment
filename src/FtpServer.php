@@ -16,7 +16,7 @@ class FtpServer implements Server
 		'port' => NULL,
 		'user' => NULL,
 		'password' => NULL,
-		'path' => NULL,
+		'path' => '/',
 		'secured' => TRUE,
 		'passive' => TRUE,
 	];
@@ -35,7 +35,7 @@ class FtpServer implements Server
 
 	public function connect()
 	{
-		$this->connecttion = $this->protect(
+		$this->connection = $this->protect(
 			$this->config['secured'] ? 'ftp_ssl_connect' : 'ftp_connect',
 			[$this->config['host'], $this->config['port']]
 		);
@@ -81,6 +81,8 @@ class FtpServer implements Server
 	}
 
 	/**
+	 * Method extracted from dg/ftp-deployment.
+	 * @see https://github.com/dg/ftp-deployment/blob/master/src/Deployment/FtpServer.php#L284
 	 * @param string $command
 	 * @param array $args
 	 * @return mixed
@@ -88,11 +90,18 @@ class FtpServer implements Server
 	 */
 	private function protect($command, array $args = [])
 	{
-		try {
-			return call_user_func_array($command, $args);
-		} catch (\Throwable $e) {
-			throw new \Exception($e->getMessage(), $e->getCode(), $e);
-		}
+		set_error_handler(function ($severity, $message) {
+			restore_error_handler();
+			if (preg_match('~^\w+\(\):\s*(.+)~', $message, $m)) {
+				$message = $m[1];
+			}
+
+			throw new \Exception($message);
+		});
+
+		$res = call_user_func_array($command, $args);
+		restore_error_handler();
+		return $res;
 	}
 
 	private function writeDirectory(string $remotePath)
@@ -102,7 +111,18 @@ class FtpServer implements Server
 		$path = '';
 		while (!empty($parts)) {
 			$path .= array_shift($parts);
-			$this->ftp('mkdir', $path);
+
+			try {
+				if ($path !== '') {
+					$this->ftp('mkdir', [$path]);
+				}
+			} catch (\Exception $e) {
+				// Ignore error when directory already exists
+				if (strpos($e->getMessage(), 'File exists') === FALSE) {
+					throw $e;
+				}
+			}
+
 			$path .= '/';
 		}
 	}
