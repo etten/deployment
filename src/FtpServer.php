@@ -66,7 +66,7 @@ class FtpServer implements Server
 	 * @return mixed
 	 * @throws FtpException
 	 */
-	private function ftp($command, array $args = [])
+	private function ftp(string $command, array $args = [])
 	{
 		if (!$this->connection) {
 			$this->connect();
@@ -95,7 +95,7 @@ class FtpServer implements Server
 	 * @return mixed
 	 * @throws FtpException
 	 */
-	private function protect($command, array $args = [])
+	private function protect(string $command, array $args = [])
 	{
 		set_error_handler(function ($severity, $message) {
 			restore_error_handler();
