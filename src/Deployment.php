@@ -17,6 +17,7 @@ class Deployment
 		'path' => '/',
 		'temp' => '/.deploy/',
 		'deployedFile' => '/.deployed',
+		'deletedFile' => '/.deleted',
 	];
 
 	/** @var Server */
@@ -45,18 +46,23 @@ class Deployment
 		$localFiles = $this->collector->collect();
 		$deployedFiles = $this->readFileList($this->config['deployedFile']);
 
-		$this->uploadFiles($this->filterFiles($localFiles, $deployedFiles));
+		$toUpload = $this->filterDeployedFiles($localFiles, $deployedFiles);
+		$toDelete = array_diff_key($deployedFiles, $localFiles);
+
+		$this->uploadFiles($toUpload);
+
 		$this->writeFileList($this->config['deployedFile'], $localFiles);
+		$this->writeFileList($this->config['deletedFile'], $toDelete);
 	}
 
-	private function filterFiles(array $newFiles, array $existingFiles):array
+	private function filterDeployedFiles(array $local, array $deployed):array
 	{
-		return array_filter($newFiles, function ($value, $key) use ($existingFiles) {
-			if (!isset($existingFiles[$key])) {
+		return array_filter($local, function ($value, $key) use ($deployed) {
+			if (!isset($deployed[$key])) {
 				return TRUE;
 			}
 
-			return $value !== $existingFiles[$key];
+			return $value !== $deployed[$key];
 		}, ARRAY_FILTER_USE_BOTH);
 	}
 
