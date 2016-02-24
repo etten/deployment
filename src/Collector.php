@@ -10,6 +10,14 @@ namespace Etten\Deployment;
 interface Collector
 {
 
+	/**
+	 * @return string Full local base path.
+	 */
+	public function basePath():string;
+
+	/**
+	 * @return array [relativePath => hash]
+	 */
 	public function collect():array;
 
 }

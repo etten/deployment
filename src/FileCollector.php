@@ -27,6 +27,17 @@ class FileCollector implements Collector
 		], $ignoredMask);
 	}
 
+	/**
+	 * @return string Full local base path.
+	 */
+	public function basePath():string
+	{
+		return $this->basePath;
+	}
+
+	/**
+	 * @return array [relativePath => hash]
+	 */
 	public function collect():array
 	{
 		return $this->collectRecursively('');
