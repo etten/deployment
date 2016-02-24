@@ -10,27 +10,49 @@ namespace Etten\Deployment;
 class Deployment
 {
 
+	/** @var array */
+	private $config = [
+		'path' => '/',
+		'temp' => '.deploy/',
+	];
+
 	/** @var Server */
 	private $server;
 
 	/** @var Collector */
 	private $collector;
 
-	public function __construct(Server $server, Collector $collector)
+	public function __construct(array $config, Server $server, Collector $collector)
 	{
+		$this->config = array_merge($this->config, $config);
 		$this->server = $server;
 		$this->collector = $collector;
 	}
 
 	public function run()
 	{
-		$this->server->connect();
-
 		$files = $this->collector->collect();
+		$this->upload($files);
+	}
 
+	private function upload(array $files)
+	{
 		foreach ($files as $file => $hash) {
-			$this->server->write($file, $this->collector->basePath() . $file);
+			$this->server->write(
+				$this->getRemotePath($file),
+				$this->getLocalPath($file)
+			);
 		}
+	}
+
+	private function getRemotePath(string $file):string
+	{
+		return $this->config['path'] . $this->config['temp'] . $file;
+	}
+
+	private function getLocalPath(string $file):string
+	{
+		return $this->collector->basePath() . $file;
 	}
 
 }

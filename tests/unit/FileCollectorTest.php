@@ -67,14 +67,17 @@ class FileCollectorTest extends \PHPUnit_Framework_TestCase
 
 		$directory = vfs\vfsStream::setup('root', NULL, $structure);
 
-		$collector = new FileCollector($directory->url(), [
-			'/dev-local',
-			'/temp/*',
-			'!/temp/.htaccess',
-			'!/temp/sessions',
-			'/temp/sessions/*',
-			'!/temp/cache',
-			'/temp/cache/*',
+		$collector = new FileCollector([
+			'path' => $directory->url(),
+			'ignore' => [
+				'/dev-local',
+				'/temp/*',
+				'!/temp/.htaccess',
+				'!/temp/sessions',
+				'/temp/sessions/*',
+				'!/temp/cache',
+				'/temp/cache/*',
+			],
 		]);
 		$this->assertSame($expected, $collector->collect());
 	}

@@ -9,17 +9,19 @@ $config = [
 		'host' => 'demo.hranicka.cz',
 		'user' => 'demo.hranicka.cz',
 		'password' => 'demo1.',
-		'path' => '/',
 		'secured' => FALSE,
 	],
 	'collector' => [
 		'path' => __DIR__ . '/../',
 		'ignore' => [],
 	],
+	'deployment' => [
+		'path' => '/',
+	],
 ];
 
 $server = new Deployment\FtpServer($config['server']);
-$collector = new Deployment\FileCollector($config['collector']['path'], $config['collector']['ignore']);
+$collector = new Deployment\FileCollector($config['collector']);
 
-$deployment = new Deployment\Deployment($server, $collector);
+$deployment = new Deployment\Deployment($config['deployment'], $server, $collector);
 $deployment->run();

@@ -16,7 +16,6 @@ class FtpServer implements Server
 		'port' => NULL,
 		'user' => NULL,
 		'password' => NULL,
-		'path' => '/',
 		'secured' => TRUE,
 		'passive' => TRUE,
 	];
@@ -31,21 +30,6 @@ class FtpServer implements Server
 		}
 
 		$this->config = array_merge($this->config, $config);
-	}
-
-	public function connect()
-	{
-		$this->connection = $this->protect(
-			$this->config['secured'] ? 'ftp_ssl_connect' : 'ftp_connect',
-			[$this->config['host'], $this->config['port']]
-		);
-
-		$this->ftp('login', [$this->config['user'], $this->config['password']]);
-		$this->ftp('pasv', [$this->config['passive']]);
-
-		if (isset($this->config['path'])) {
-			$this->writeDirectory([$this->config['path']]);
-		}
 	}
 
 	public function read(string $remotePath, string $localPath)
@@ -76,8 +60,23 @@ class FtpServer implements Server
 	 */
 	private function ftp($command, array $args = [])
 	{
+		if (!$this->connection) {
+			$this->connect();
+		}
+
 		array_unshift($args, $this->connection);
 		return $this->protect('ftp_' . $command, $args);
+	}
+
+	private function connect()
+	{
+		$this->connection = $this->protect(
+			$this->config['secured'] ? 'ftp_ssl_connect' : 'ftp_connect',
+			[$this->config['host'], $this->config['port']]
+		);
+
+		$this->ftp('login', [$this->config['user'], $this->config['password']]);
+		$this->ftp('pasv', [$this->config['passive']]);
 	}
 
 	/**

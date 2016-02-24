@@ -14,17 +14,17 @@ class FileCollector implements Collector
 	private $basePath;
 
 	/** @var string[] */
-	private $ignoreMasks = [];
+	private $ignoreMasks = [
+		'*.local.neon',
+		'.git*',
+		'Thumbs.db',
+		'.DS_Store',
+	];
 
-	public function __construct(string $basePath, array $ignoreMask = [])
+	public function __construct(array $config)
 	{
-		$this->basePath = $basePath;
-		$this->ignoreMasks = array_merge([
-			'*.local.neon',
-			'.git*',
-			'Thumbs.db',
-			'.DS_Store',
-		], $ignoreMask);
+		$this->basePath = $config['path'];
+		$this->ignoreMasks = array_merge($this->ignoreMasks, $config['ignore']);
 	}
 
 	/**
