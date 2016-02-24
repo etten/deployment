@@ -13,7 +13,7 @@ class Deployment
 	/** @var array */
 	private $config = [
 		'path' => '/',
-		'temp' => '.deploy/',
+		'temp' => '/.deploy/',
 	];
 
 	/** @var Server */
@@ -45,14 +45,29 @@ class Deployment
 		}
 	}
 
+	private function getRemoteBasePath()
+	{
+		return $this->config['path'];
+	}
+
+	private function getRemoteTempPath()
+	{
+		return $this->mergePaths($this->getRemoteBasePath(), $this->config['temp']);
+	}
+
 	private function getRemotePath(string $file):string
 	{
-		return $this->config['path'] . $this->config['temp'] . $file;
+		return $this->mergePaths($this->getRemoteTempPath(), $file);
 	}
 
 	private function getLocalPath(string $file):string
 	{
-		return $this->collector->basePath() . $file;
+		return $this->mergePaths($this->collector->basePath(), $file);
+	}
+
+	private function mergePaths($path1, $path2)
+	{
+		return rtrim($path1, '/') . $path2;
 	}
 
 }
