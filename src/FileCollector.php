@@ -16,7 +16,7 @@ class FileCollector implements Collector
 	/** @var string[] */
 	private $ignoreMasks = [];
 
-	public function __construct(string $basePath, array $ignoredMask = [])
+	public function __construct(string $basePath, array $ignoreMask = [])
 	{
 		$this->basePath = $basePath;
 		$this->ignoreMasks = array_merge([
@@ -24,7 +24,7 @@ class FileCollector implements Collector
 			'.git*',
 			'Thumbs.db',
 			'.DS_Store',
-		], $ignoredMask);
+		], $ignoreMask);
 	}
 
 	/**
