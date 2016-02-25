@@ -93,7 +93,7 @@ class Deployment
 
 	private function moveFiles(array $files)
 	{
-		krsort($files); // Sort Z-A by $file - root directory at last
+		ksort($files); // Sort A-Z by file name - directory before file
 
 		foreach ($files as $file => $hash) {
 			$isDir = substr($file, -1) === '/';
@@ -104,12 +104,6 @@ class Deployment
 					$this->mergePaths($this->getRemoteBasePath(), $file),
 					$this->mergePaths($this->collector->basePath(), $file)
 				);
-
-				// Remove temp directory (should be empty now)
-				$this->server->remove(
-					$this->mergePaths($this->getRemoteTempPath(), $file)
-				);
-
 			} else {
 				// Rename file
 				$this->server->rename(

@@ -57,17 +57,41 @@ class FtpServer implements Server
 
 	public function remove(string $remotePath)
 	{
-		$command = $this->isDirectory($remotePath) ?
-			'rmDir' :
-			'delete';
-
 		try {
-			$this->ftp($command, [$remotePath]);
+			if ($this->isDirectory($remotePath)) {
+				$this->removeDirectory($remotePath);
+			} else {
+				$this->removeFile($remotePath);
+			}
 		} catch (FtpException $e) {
 			if ($this->ftp('nlist', [$remotePath])) {
 				throw $e;
 			}
 		}
+	}
+
+	private function removeFile(string $path)
+	{
+		$this->ftp('delete', [$path]);
+	}
+
+	private function removeDirectory(string $path)
+	{
+		$list = $this->ftp('nlist', [$path]);
+		foreach ($list as $item) {
+			if (in_array($item, ['.', '..'])) {
+				continue;
+			}
+
+			$itemPath = $path . $item;
+			if ($this->isDirectoryExists($itemPath)) {
+				$this->removeDirectory($itemPath . '/');
+			} else {
+				$this->removeFile($itemPath);
+			}
+		}
+
+		$this->ftp('rmdir', [$path]);
 	}
 
 	/**
@@ -126,6 +150,21 @@ class FtpServer implements Server
 	private function isDirectory(string $path):bool
 	{
 		return substr($path, -1) === '/';
+	}
+
+	private function isDirectoryExists(string $path):bool
+	{
+		$exists = TRUE;
+		$currentDir = $this->ftp('pwd');
+
+		try {
+			$this->ftp('chdir', [$path]);
+		} catch (FtpException $e) {
+			$exists = FALSE;
+		}
+
+		$this->ftp('chdir', [$currentDir ?: '/']);
+		return $exists;
 	}
 
 	private function writeDirectory(string $remotePath)
