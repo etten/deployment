@@ -42,8 +42,7 @@ class FtpServer implements Server
 
 	public function write(string $remotePath, string $localPath)
 	{
-		$isDir = substr($remotePath, -1) === '/';
-		if ($isDir) {
+		if ($this->isDirectory($remotePath)) {
 			$this->writeDirectory($remotePath);
 		} else {
 			$this->writeFile($remotePath, $localPath);
@@ -52,12 +51,23 @@ class FtpServer implements Server
 
 	public function rename(string $originalPath, string $newPath)
 	{
+		$this->remove($newPath);
 		$this->ftp('rename', [$originalPath, $newPath]);
 	}
 
 	public function remove(string $remotePath)
 	{
-		$this->ftp('delete', [$remotePath]);
+		$command = $this->isDirectory($remotePath) ?
+			'rmDir' :
+			'delete';
+
+		try {
+			$this->ftp($command, [$remotePath]);
+		} catch (FtpException $e) {
+			if ($this->ftp('nlist', [$remotePath])) {
+				throw $e;
+			}
+		}
 	}
 
 	/**
@@ -111,6 +121,11 @@ class FtpServer implements Server
 		$res = call_user_func_array($command, $args);
 		restore_error_handler();
 		return $res;
+	}
+
+	private function isDirectory(string $path):bool
+	{
+		return substr($path, -1) === '/';
 	}
 
 	private function writeDirectory(string $remotePath)
