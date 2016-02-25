@@ -78,19 +78,26 @@ class FtpServer implements Server
 	private function removeDirectory(string $path)
 	{
 		$list = $this->ftp('nlist', [$path]);
+
 		foreach ($list as $item) {
+			// Skip current and previous directory mark
 			if (in_array($item, ['.', '..'])) {
 				continue;
 			}
 
-			$itemPath = $path . $item;
+			// Build full file path
+			$itemPath = rtrim($path, '/') . '/' . $item;
+
+			// If is a directory, add directory separator to the end
 			if ($this->isDirectoryExists($itemPath)) {
-				$this->removeDirectory($itemPath . '/');
-			} else {
-				$this->removeFile($itemPath);
+				$itemPath .= '/';
 			}
+
+			// Remove current item
+			$this->remove($itemPath);
 		}
 
+		// Directory should be empty now, delete it
 		$this->ftp('rmdir', [$path]);
 	}
 
