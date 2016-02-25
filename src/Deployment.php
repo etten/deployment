@@ -78,8 +78,8 @@ class Deployment
 
 	private function readFileList(string $file):array
 	{
-		$tempFile = tmpfile();
-		$tempFilePath = stream_get_meta_data($tempFile)['uri'];
+		$tempFileStream = tmpfile();
+		$tempFilePath = stream_get_meta_data($tempFileStream)['uri'];
 
 		try {
 			$this->server->read(
@@ -95,8 +95,8 @@ class Deployment
 
 	private function writeFileList(string $file, array $files)
 	{
-		$tempFile = tmpfile();
-		$tempFilePath = stream_get_meta_data($tempFile)['uri'];
+		$tempFileStream = tmpfile();
+		$tempFilePath = stream_get_meta_data($tempFileStream)['uri'];
 
 		$this->fileList->write($tempFilePath, $files);
 
