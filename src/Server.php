@@ -10,12 +10,38 @@ namespace Etten\Deployment;
 interface Server
 {
 
+	/**
+	 * Reads the remote file and saves it locally.
+	 * @param string $remotePath
+	 * @param string $localPath
+	 * @return void
+	 */
 	public function read(string $remotePath, string $localPath);
 
+	/**
+	 * Writes remote file or directory (recursively).
+	 * Directory must end with slash (/) at the end of path.
+	 * @param string $remotePath
+	 * @param string $localPath
+	 * @return void
+	 */
 	public function write(string $remotePath, string $localPath);
 
+	/**
+	 * Renames remote file or folder.
+	 * Directory must end with slash (/) at the end of path.
+	 * @param string $originalPath
+	 * @param string $newPath
+	 * @return void
+	 */
 	public function rename(string $originalPath, string $newPath);
 
+	/**
+	 * Removes remote file or directory.
+	 * Directory must end with slash (/) at the end of path.
+	 * @param string $remotePath
+	 * @return void
+	 */
 	public function remove(string $remotePath);
 
 }
