@@ -26,7 +26,7 @@ before_script:
 
 script:
   # Run PHP CodeSniffer
-  - vendor/bin/phpcs --standard=vendor/artfocus/codestyle/Artfocus/ruleset.xml -nsp src tests
+  - vendor/bin/phpcs --standard=vendor/etten/codestyle/Etten/ruleset.xml -nsp src tests
 
   # Run PHPUnit
   - vendor/bin/phpunit --log-junit shippable/testresults/junit.xml --coverage-xml shippable/codecoverage tests
