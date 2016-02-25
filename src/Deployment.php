@@ -29,20 +29,27 @@ class Deployment
 	/** @var FileList */
 	private $fileList;
 
+	/** @var Events */
+	private $events;
+
 	public function __construct(
 		array $config,
 		Server $server,
 		Collector $collector,
-		FileList $fileList
+		FileList $fileList,
+		Events $events
 	) {
 		$this->config = array_merge($this->config, $config);
 		$this->server = $server;
 		$this->collector = $collector;
 		$this->fileList = $fileList;
+		$this->events = $events;
 	}
 
 	public function run()
 	{
+		$this->events->start();
+
 		// Collect files
 		$localFiles = $this->collector->collect();
 		$deployedFiles = $this->readDeployedFiles($this->config['deployedFile']);
@@ -51,6 +58,7 @@ class Deployment
 		$toDelete = array_diff_key($deployedFiles, $localFiles);
 
 		// Upload all new files
+		$this->events->beforeUpload();
 		$this->uploadFiles($toUpload);
 
 		// Create & Upload File Lists
@@ -58,6 +66,7 @@ class Deployment
 		$this->writeFileList($this->config['deletedFile'], $toDelete);
 
 		// Move uploaded files
+		$this->events->beforeMove();
 		$this->moveFiles($toUpload);
 
 		// Move Deployed File List
@@ -71,6 +80,8 @@ class Deployment
 
 		// Clean .deploy directory
 		$this->server->remove($this->getRemoteTempPath());
+
+		$this->events->finish();
 	}
 
 	private function filterDeployedFiles(array $local, array $deployed):array

@@ -21,8 +21,19 @@ $config = [
 ];
 
 $server = new Deployment\FtpServer($config['server']);
+
 $collector = new Deployment\FileCollector($config['collector']);
+
 $deployedList = new Deployment\FileList();
 
-$deployment = new Deployment\Deployment($config['deployment'], $server, $collector, $deployedList);
+$events = new Deployment\Events();
+
+$deployment = new Deployment\Deployment(
+	$config['deployment'],
+	$server,
+	$collector,
+	$deployedList,
+	$events
+);
+
 $deployment->run();
