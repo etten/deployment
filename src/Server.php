@@ -11,6 +11,14 @@ interface Server
 {
 
 	/**
+	 * Checks if remote file or directory exists.
+	 * Directory must end with slash (/) at the end of path.
+	 * @param string $remotePath
+	 * @return bool
+	 */
+	public function exists(string $remotePath):bool;
+
+	/**
 	 * Reads the remote file and saves it locally.
 	 * @param string $remotePath
 	 * @param string $localPath

@@ -35,6 +35,15 @@ class FtpServer implements Server
 		$this->config = array_merge($this->config, $config);
 	}
 
+	public function exists(string $remotePath):bool
+	{
+		if ($this->isDirectory($remotePath)) {
+			return $this->isDirectoryExists($remotePath);
+		} else {
+			return $this->isFileExists($remotePath);
+		}
+	}
+
 	public function read(string $remotePath, string $localPath)
 	{
 		$this->ftp('get', [$localPath, $remotePath, FTP_BINARY]);
@@ -172,6 +181,18 @@ class FtpServer implements Server
 
 		$this->ftp('chdir', [$currentDir ?: '/']);
 		return $exists;
+	}
+
+	private function isFileExists(string $path):bool
+	{
+		$tempFilePath = TempFile::create();
+
+		try {
+			$this->read($path, $tempFilePath);
+			return TRUE;
+		} catch (FtpException $e) {
+			return FALSE;
+		}
 	}
 
 	private function writeDirectory(string $remotePath)

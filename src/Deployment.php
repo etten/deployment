@@ -7,8 +7,6 @@
 
 namespace Etten\Deployment;
 
-use Etten\Deployment\Exceptions\FtpException;
-
 class Deployment
 {
 
@@ -154,18 +152,15 @@ class Deployment
 
 	private function readDeployedFiles(string $file):array
 	{
-		$tempFilePath = TempFile::create();
+		$remotePath = $this->mergePaths($this->getRemoteBasePath(), $file);
 
-		try {
-			$this->server->read(
-				$this->mergePaths($this->getRemoteBasePath(), $file),
-				$tempFilePath
-			);
-
+		if ($this->server->exists($remotePath)) {
+			$tempFilePath = TempFile::create();
+			$this->server->read($remotePath, $tempFilePath);
 			return $this->fileList->read($tempFilePath);
-		} catch (FtpException $e) {
-			return [];
 		}
+
+		return [];
 	}
 
 	private function writeFileList(string $file, array $files)
