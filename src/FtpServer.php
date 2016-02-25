@@ -68,9 +68,7 @@ class FtpServer implements Server
 	 */
 	private function ftp(string $command, array $args = [])
 	{
-		if (!$this->connection) {
-			$this->connect();
-		}
+		$this->connect();
 
 		array_unshift($args, $this->connection);
 		return $this->protect('ftp_' . $command, $args);
@@ -78,6 +76,10 @@ class FtpServer implements Server
 
 	private function connect()
 	{
+		if ($this->connection) {
+			return;
+		}
+
 		$this->connection = $this->protect(
 			$this->config['secured'] ? 'ftp_ssl_connect' : 'ftp_connect',
 			[$this->config['host'], $this->config['port']]
