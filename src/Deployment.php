@@ -53,6 +53,8 @@ class Deployment
 
 		$this->writeFileList($this->config['deployedFile'], $localFiles);
 		$this->writeFileList($this->config['deletedFile'], $toDelete);
+
+		$this->moveFiles($toUpload);
 	}
 
 	private function filterDeployedFiles(array $local, array $deployed):array
@@ -73,6 +75,35 @@ class Deployment
 				$this->mergePaths($this->getRemoteTempPath(), $file),
 				$this->mergePaths($this->collector->basePath(), $file)
 			);
+		}
+	}
+
+	private function moveFiles(array $files)
+	{
+		krsort($files); // Sort Z-A by $file - root directory at last
+
+		foreach ($files as $file => $hash) {
+			$isDir = substr($file, -1) === '/';
+
+			if ($isDir) {
+				// Create a new directory
+				$this->server->write(
+					$this->mergePaths($this->getRemoteBasePath(), $file),
+					$this->mergePaths($this->collector->basePath(), $file)
+				);
+
+				// Remove temp directory (should be empty now)
+				$this->server->remove(
+					$this->mergePaths($this->getRemoteTempPath(), $file)
+				);
+
+			} else {
+				// Rename file
+				$this->server->rename(
+					$this->mergePaths($this->getRemoteTempPath(), $file),
+					$this->mergePaths($this->getRemoteBasePath(), $file)
+				);
+			}
 		}
 	}
 
