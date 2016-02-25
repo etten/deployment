@@ -50,7 +50,7 @@ class Deployment
 		$toUpload = $this->filterDeployedFiles($localFiles, $deployedFiles);
 		$toDelete = array_diff_key($deployedFiles, $localFiles);
 
-		// Run upload
+		// Upload all new files
 		$this->uploadFiles($toUpload);
 
 		// Create & Upload File Lists
@@ -65,6 +65,9 @@ class Deployment
 			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
 			$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile'])
 		);
+
+		// Delete not tracked files
+		$this->deleteFiles($toDelete);
 
 		// Clean .deploy directory
 		$this->server->remove($this->getRemoteTempPath());
@@ -111,6 +114,15 @@ class Deployment
 					$this->mergePaths($this->getRemoteBasePath(), $file)
 				);
 			}
+		}
+	}
+
+	private function deleteFiles(array $files)
+	{
+		foreach ($files as $file => $hash) {
+			$this->server->remove(
+				$this->mergePaths($this->getRemoteBasePath(), $file)
+			);
 		}
 	}
 
