@@ -58,28 +58,43 @@ class Deployment
 		$toDelete = array_diff_key($deployedFiles, $localFiles);
 
 		// Upload all new files
-		$this->events->beforeUpload();
-		$this->uploadFiles($toUpload);
+		if ($toUpload) {
+			$this->events->beforeUpload();
+			$this->uploadFiles($toUpload);
+		}
 
 		// Create & Upload File Lists
-		$this->writeFileList($this->config['deployedFile'], $localFiles);
-		$this->writeFileList($this->config['deletedFile'], $toDelete);
+		if ($toUpload || $toDelete) {
+			$this->writeFileList($this->config['deployedFile'], $localFiles);
+		}
+
+		if ($toDelete) {
+			$this->writeFileList($this->config['deletedFile'], $toDelete);
+		}
 
 		// Move uploaded files
-		$this->events->beforeMove();
-		$this->moveFiles($toUpload);
+		if ($toUpload) {
+			$this->events->beforeMove();
+			$this->moveFiles($toUpload);
+		}
 
 		// Move Deployed File List
-		$this->server->rename(
-			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
-			$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile'])
-		);
+		if ($toUpload || $toDelete) {
+			$this->server->rename(
+				$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
+				$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile'])
+			);
+		}
 
 		// Delete not tracked files
-		$this->deleteFiles($toDelete);
+		if ($toDelete) {
+			$this->deleteFiles($toDelete);
+		}
 
 		// Clean .deploy directory
-		$this->server->remove($this->getRemoteTempPath());
+		if ($toUpload || $toDelete) {
+			$this->server->remove($this->getRemoteTempPath());
+		}
 
 		$this->events->finish();
 	}
