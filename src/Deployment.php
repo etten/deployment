@@ -12,7 +12,7 @@ use Etten\Deployment\Exceptions\FtpException;
 class Deployment
 {
 
-	/** @var array */
+	/** @var string[] */
 	private $config = [
 		'path' => '/',
 		'temp' => '/.deploy/',
@@ -43,18 +43,31 @@ class Deployment
 
 	public function run()
 	{
+		// Collect files
 		$localFiles = $this->collector->collect();
-		$deployedFiles = $this->readFileList($this->config['deployedFile']);
+		$deployedFiles = $this->readDeployedFiles($this->config['deployedFile']);
 
 		$toUpload = $this->filterDeployedFiles($localFiles, $deployedFiles);
 		$toDelete = array_diff_key($deployedFiles, $localFiles);
 
+		// Run upload
 		$this->uploadFiles($toUpload);
 
+		// Create & Upload File Lists
 		$this->writeFileList($this->config['deployedFile'], $localFiles);
 		$this->writeFileList($this->config['deletedFile'], $toDelete);
 
+		// Move uploaded files
 		$this->moveFiles($toUpload);
+
+		// Move Deployed File List
+		$this->server->rename(
+			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
+			$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile'])
+		);
+
+		// Clean .deploy directory
+		$this->server->remove($this->getRemoteTempPath());
 	}
 
 	private function filterDeployedFiles(array $local, array $deployed):array
@@ -107,10 +120,9 @@ class Deployment
 		}
 	}
 
-	private function readFileList(string $file):array
+	private function readDeployedFiles(string $file):array
 	{
-		$tempFileStream = tmpfile();
-		$tempFilePath = stream_get_meta_data($tempFileStream)['uri'];
+		$tempFilePath = TempFile::create();
 
 		try {
 			$this->server->read(
@@ -126,9 +138,7 @@ class Deployment
 
 	private function writeFileList(string $file, array $files)
 	{
-		$tempFileStream = tmpfile();
-		$tempFilePath = stream_get_meta_data($tempFileStream)['uri'];
-
+		$tempFilePath = TempFile::create();
 		$this->fileList->write($tempFilePath, $files);
 
 		$this->server->write(
