@@ -36,4 +36,4 @@ $deployment = new Deployment\Deployment(
 	$events
 );
 
-$deployment->run();
+exit($deployment->run());

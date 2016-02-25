@@ -44,8 +44,12 @@ class Deployment
 		$this->events = $events;
 	}
 
-	public function run()
+	public function run():int
 	{
+		if ($this->server->exists($this->getRemoteTempPath())) {
+			return 1; // Another deployment is in progress or has failed.
+		}
+
 		$this->events->start();
 
 		// Collect files
@@ -95,6 +99,8 @@ class Deployment
 		}
 
 		$this->events->finish();
+
+		return 0;
 	}
 
 	private function filterDeployedFiles(array $local, array $deployed):array
