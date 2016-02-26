@@ -22,6 +22,14 @@ class Events
 	/** @var array */
 	public $onFinish = [];
 
+	public function __construct(array $config = [])
+	{
+		$this->onStart = $config['onStart'] ?? [];
+		$this->onBeforeUpload = $config['onBeforeUpload'] ?? [];
+		$this->onBeforeMove = $config['onBeforeMove'] ?? [];
+		$this->onFinish = $config['onFinish'] ?? [];
+	}
+
 	public function start()
 	{
 		$this->trigger($this->onFinish);

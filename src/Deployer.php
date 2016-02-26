@@ -7,7 +7,9 @@
 
 namespace Etten\Deployment;
 
-class Deployment
+use Etten\Deployment\Exceptions\Exception;
+
+class Deployer
 {
 
 	/** @var string[] */
@@ -27,83 +29,44 @@ class Deployment
 	/** @var FileList */
 	private $fileList;
 
-	/** @var Events */
-	private $events;
-
 	public function __construct(
 		array $config,
 		Server $server,
 		Collector $collector,
-		FileList $fileList,
-		Events $events
+		FileList $fileList
 	) {
 		$this->config = array_merge($this->config, $config);
 		$this->server = $server;
 		$this->collector = $collector;
 		$this->fileList = $fileList;
-		$this->events = $events;
 	}
 
-	public function run():int
+	public function checkPrevious()
 	{
 		if ($this->server->exists($this->getRemoteTempPath())) {
-			return 1; // Another deployment is in progress or has failed.
+			throw new Exception('Another deployment is in progress or has failed.');
 		}
-
-		$this->events->start();
-
-		// Collect files
-		$localFiles = $this->collector->collect();
-		$deployedFiles = $this->readDeployedFiles($this->config['deployedFile']);
-
-		$toUpload = $this->filterDeployedFiles($localFiles, $deployedFiles);
-		$toDelete = array_diff_key($deployedFiles, $localFiles);
-
-		// Upload all new files
-		if ($toUpload) {
-			$this->events->beforeUpload();
-			$this->uploadFiles($toUpload);
-		}
-
-		// Create & Upload File Lists
-		if ($toUpload || $toDelete) {
-			$this->writeFileList($this->config['deployedFile'], $localFiles);
-		}
-
-		if ($toDelete) {
-			$this->writeFileList($this->config['deletedFile'], $toDelete);
-		}
-
-		// Move uploaded files
-		if ($toUpload) {
-			$this->events->beforeMove();
-			$this->moveFiles($toUpload);
-		}
-
-		// Move Deployed File List
-		if ($toUpload || $toDelete) {
-			$this->server->rename(
-				$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
-				$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile'])
-			);
-		}
-
-		// Delete not tracked files
-		if ($toDelete) {
-			$this->deleteFiles($toDelete);
-		}
-
-		// Clean .deploy directory
-		if ($toUpload || $toDelete) {
-			$this->server->remove($this->getRemoteTempPath());
-		}
-
-		$this->events->finish();
-
-		return 0;
 	}
 
-	private function filterDeployedFiles(array $local, array $deployed):array
+	public function findLocalFiles():array
+	{
+		return $this->collector->collect();
+	}
+
+	public function findDeployedFiles():array
+	{
+		$remotePath = $this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile']);
+
+		if ($this->server->exists($remotePath)) {
+			$tempFilePath = TempFile::create();
+			$this->server->read($remotePath, $tempFilePath);
+			return $this->fileList->read($tempFilePath);
+		}
+
+		return [];
+	}
+
+	public function filterFilesToDeploy(array $local, array $deployed):array
 	{
 		return array_filter($local, function ($value, $key) use ($deployed) {
 			if (!isset($deployed[$key])) {
@@ -114,7 +77,12 @@ class Deployment
 		}, ARRAY_FILTER_USE_BOTH);
 	}
 
-	private function uploadFiles(array $files)
+	public function filterFilesToDelete(array $local, $deployed):array
+	{
+		return array_diff_key($deployed, $local);
+	}
+
+	public function uploadFiles(array $files)
 	{
 		foreach ($files as $file => $hash) {
 			$this->server->write(
@@ -124,7 +92,7 @@ class Deployment
 		}
 	}
 
-	private function moveFiles(array $files)
+	public function moveFiles(array $files)
 	{
 		ksort($files); // Sort A-Z by file name - directory before file
 
@@ -147,7 +115,7 @@ class Deployment
 		}
 	}
 
-	private function deleteFiles(array $files)
+	public function deleteFiles(array $files)
 	{
 		foreach ($files as $file => $hash) {
 			$this->server->remove(
@@ -156,17 +124,27 @@ class Deployment
 		}
 	}
 
-	private function readDeployedFiles(string $file):array
+	public function clean()
 	{
-		$remotePath = $this->mergePaths($this->getRemoteBasePath(), $file);
+		$this->server->remove($this->getRemoteTempPath());
+	}
 
-		if ($this->server->exists($remotePath)) {
-			$tempFilePath = TempFile::create();
-			$this->server->read($remotePath, $tempFilePath);
-			return $this->fileList->read($tempFilePath);
-		}
+	public function writeDeployedList(array $files)
+	{
+		$this->writeFileList($this->config['deployedFile'], $files);
+	}
 
-		return [];
+	public function moveDeployedList()
+	{
+		$this->server->rename(
+			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
+			$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile'])
+		);
+	}
+
+	public function writeDeletedList(array $files)
+	{
+		$this->writeFileList($this->config['deletedFile'], $files);
 	}
 
 	private function writeFileList(string $file, array $files)

@@ -4,36 +4,7 @@ use Etten\Deployment;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$config = [
-	'server' => [
-		'host' => 'demo.hranicka.cz',
-		'user' => 'demo.hranicka.cz',
-		'password' => 'demo1.',
-		'secured' => FALSE,
-	],
-	'collector' => [
-		'path' => __DIR__ . '/../',
-		'ignore' => [],
-	],
-	'deployment' => [
-		'path' => '/',
-	],
-];
+$app = new \Symfony\Component\Console\Application();
+$app->add(new Deployment\SymfonyConsole\DeploymentCommand());
 
-$server = new Deployment\FtpServer($config['server']);
-
-$collector = new Deployment\FileCollector($config['collector']);
-
-$deployedList = new Deployment\FileList();
-
-$events = new Deployment\Events();
-
-$deployment = new Deployment\Deployment(
-	$config['deployment'],
-	$server,
-	$collector,
-	$deployedList,
-	$events
-);
-
-exit($deployment->run());
+return $app->run();
