@@ -140,8 +140,6 @@ class FtpServer implements Server
 	}
 
 	/**
-	 * Method extracted from dg/ftp-deployment.
-	 * @see https://github.com/dg/ftp-deployment/blob/master/src/Deployment/FtpServer.php#L284
 	 * @param string $command
 	 * @param array $args
 	 * @return mixed
@@ -149,18 +147,21 @@ class FtpServer implements Server
 	 */
 	private function protect(string $command, array $args = [])
 	{
-		set_error_handler(function ($severity, $message) {
-			restore_error_handler();
+		$ftpExceptionErrorHandler = function ($severity, $message) {
 			if (preg_match('~^\w+\(\):\s*(.+)~', $message, $m)) {
 				$message = $m[1];
 			}
 
 			throw new FtpException($message);
-		});
+		};
 
-		$res = call_user_func_array($command, $args);
-		restore_error_handler();
-		return $res;
+		set_error_handler($ftpExceptionErrorHandler);
+
+		try {
+			return call_user_func_array($command, $args);
+		} finally {
+			restore_error_handler();
+		}
 	}
 
 	private function isDirectory(string $path):bool
