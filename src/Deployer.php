@@ -29,6 +29,9 @@ class Deployer
 	/** @var FileList */
 	private $fileList;
 
+	/** @var Logger */
+	private $logger;
+
 	public function __construct(
 		array $config,
 		Server $server,
@@ -39,6 +42,17 @@ class Deployer
 		$this->server = $server;
 		$this->collector = $collector;
 		$this->fileList = $fileList;
+		$this->logger = new VoidLogger();
+	}
+
+	/**
+	 * @param Logger $logger
+	 * @return $this
+	 */
+	public function setLogger(Logger $logger)
+	{
+		$this->logger = $logger;
+		return $this;
 	}
 
 	public function checkPrevious()
