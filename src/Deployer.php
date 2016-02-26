@@ -52,6 +52,7 @@ class Deployer
 	public function setLogger(Logger $logger)
 	{
 		$this->logger = $logger;
+		$this->collector->setLogger($logger);
 		return $this;
 	}
 

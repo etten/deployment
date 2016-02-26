@@ -42,23 +42,23 @@ class DeploymentCommand extends Console\Command\Command
 
 		// Collect files
 		$localFiles = $this->deployer->findLocalFiles();
-		$this->logger->log(sprintf('%d local files found.', count($localFiles)));
+		$this->logger->log(sprintf('%d local files and directories found.', count($localFiles)));
 
 		$deployedFiles = $this->deployer->findDeployedFiles();
-		$this->logger->log(sprintf('%d deployed files found.', count($deployedFiles)));
+		$this->logger->log(sprintf('%d deployed files and directories found.', count($deployedFiles)));
 
 		$toUpload = $this->deployer->filterFilesToDeploy($localFiles, $deployedFiles);
-		$this->logger->log(sprintf('%d files to upload.', count($toUpload)));
+		$this->logger->log(sprintf('%d files and directories to upload.', count($toUpload)));
 
 		$toDelete = $this->deployer->filterFilesToDelete($localFiles, $deployedFiles);
-		$this->logger->log(sprintf('%d files to delete.', count($toDelete)));
+		$this->logger->log(sprintf('%d files and directories to delete.', count($toDelete)));
 
 		// Upload all new files
 		if ($toUpload) {
 			$this->events->beforeUpload();
 			$this->deployer->uploadFiles($toUpload);
 		}
-		$this->logger->log(sprintf('%d files uploaded.', count($toUpload)));
+		$this->logger->log(sprintf('%d files and directories uploaded.', count($toUpload)));
 
 		// Create & Upload File Lists
 		if ($toUpload || $toDelete) {
@@ -78,14 +78,14 @@ class DeploymentCommand extends Console\Command\Command
 		// Move Deployed File List
 		if ($toUpload || $toDelete) {
 			$this->deployer->moveDeployedList();
-			$this->logger->log('Uploaded files moved from temp to production.');
+			$this->logger->log('Uploaded files and directories moved from temp to production.');
 		}
 
 		// Delete not tracked files
 		if ($toDelete) {
 			$this->deployer->deleteFiles($toDelete);
 		}
-		$this->logger->log(sprintf('%d files deleted.', count($toDelete)));
+		$this->logger->log(sprintf('%d files and directories deleted.', count($toDelete)));
 
 		// Clean .deploy directory
 		if ($toUpload || $toDelete) {

@@ -15,6 +15,8 @@ interface Collector
 	 */
 	public function basePath():string;
 
+	public function setLogger(Logger $logger);
+
 	/**
 	 * @return array [relativePath => hash]
 	 */
