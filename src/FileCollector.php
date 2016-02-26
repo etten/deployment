@@ -54,7 +54,10 @@ class FileCollector implements Collector
 	 */
 	public function collect():array
 	{
-		return $this->collectRecursively('');
+		$files = $this->collectRecursively('');
+		$this->logger->log('');
+
+		return $files;
 	}
 
 	private function collectRecursively($directory = ''):array

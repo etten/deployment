@@ -38,10 +38,12 @@ class DeploymentCommand extends Console\Command\Command
 		$this->deployer->checkPrevious();
 
 		$this->logger->log(sprintf('Started at %s', date('r')));
+		$this->logger->log('');
 		$this->events->start();
 
 		// Collect files
 		$localFiles = $this->deployer->findLocalFiles();
+
 		$this->logger->log(sprintf('%d local files and directories found.', count($localFiles)));
 
 		$deployedFiles = $this->deployer->findDeployedFiles();
@@ -53,12 +55,16 @@ class DeploymentCommand extends Console\Command\Command
 		$toDelete = $this->deployer->filterFilesToDelete($localFiles, $deployedFiles);
 		$this->logger->log(sprintf('%d files and directories to delete.', count($toDelete)));
 
+		$this->logger->log('');
+
 		// Upload all new files
 		if ($toUpload) {
 			$this->events->beforeUpload();
 			$this->deployer->uploadFiles($toUpload);
 		}
+
 		$this->logger->log(sprintf('%d files and directories uploaded.', count($toUpload)));
+		$this->logger->log('');
 
 		// Create & Upload File Lists
 		if ($toUpload || $toDelete) {
@@ -75,17 +81,21 @@ class DeploymentCommand extends Console\Command\Command
 			$this->deployer->moveFiles($toUpload);
 		}
 
+		$this->logger->log(sprintf('%d files and directories moved from temp to production.', count($toUpload)));
+		$this->logger->log('');
+
 		// Move Deployed File List
 		if ($toUpload || $toDelete) {
 			$this->deployer->moveDeployedList();
-			$this->logger->log('Uploaded files and directories moved from temp to production.');
 		}
 
 		// Delete not tracked files
 		if ($toDelete) {
 			$this->deployer->deleteFiles($toDelete);
 		}
+
 		$this->logger->log(sprintf('%d files and directories deleted.', count($toDelete)));
+		$this->logger->log('');
 
 		// Clean .deploy directory
 		if ($toUpload || $toDelete) {
