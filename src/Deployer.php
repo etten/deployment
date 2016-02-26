@@ -99,7 +99,11 @@ class Deployer
 
 	public function uploadFiles(array $files)
 	{
+		$count = count($files);
+		$progress = 0;
+
 		foreach ($files as $file => $hash) {
+			$this->logger->log(sprintf('Uploading [%d/%d] %s', ++$progress, $count, $file));
 			$this->server->write(
 				$this->mergePaths($this->getRemoteTempPath(), $file),
 				$this->mergePaths($this->collector->basePath(), $file)
@@ -111,7 +115,11 @@ class Deployer
 	{
 		ksort($files); // Sort A-Z by file name - directory before file
 
+		$count = count($files);
+		$progress = 0;
+
 		foreach ($files as $file => $hash) {
+			$this->logger->log(sprintf('Moving [%d/%d] %s', ++$progress, $count, $file));
 			$isDir = substr($file, -1) === '/';
 
 			if ($isDir) {
@@ -132,7 +140,12 @@ class Deployer
 
 	public function deleteFiles(array $files)
 	{
+		$count = count($files);
+		$progress = 0;
+
 		foreach ($files as $file => $hash) {
+			$this->logger->log(sprintf('Deleting [%d/%d] %s', ++$progress, $count, $file));
+
 			$this->server->remove(
 				$this->mergePaths($this->getRemoteBasePath(), $file)
 			);
