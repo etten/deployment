@@ -13,16 +13,16 @@ use Etten\Deployment\VoidProgress;
 class Events
 {
 
-	/** @var array */
+	/** @var Job[] */
 	public $onStart = [];
 
-	/** @var array */
+	/** @var Job[] */
 	public $onBeforeUpload = [];
 
-	/** @var array */
+	/** @var Job[] */
 	public $onBeforeMove = [];
 
-	/** @var array */
+	/** @var Job[] */
 	public $onFinish = [];
 
 	/** @var Progress */
@@ -67,11 +67,12 @@ class Events
 		$this->invoke($this->onFinish);
 	}
 
-	private function invoke(array $runners)
+	private function invoke(array $jobs)
 	{
-		foreach ($runners as $runner) {
+		foreach ($jobs as $job) {
 			try {
-				$this->invokeRunner($runner);
+				$this->runJob($job);
+
 			} catch (EventException $e) {
 				$this->progress->log(sprintf('Job failed with message: %s', $e->getMessage()));
 				$continue = $this->progress->ask('Continue anyway?', TRUE);
@@ -83,29 +84,31 @@ class Events
 	}
 
 	/**
-	 * @param mixed $runner
+	 * @param Job|mixed $job
 	 * @throws EventException
 	 */
-	private function invokeRunner($runner)
+	private function runJob($job)
 	{
-		if (is_callable($runner)) {
-			try {
-				$runner($this->progress);
-			} catch (\Throwable $e) {
-				throw new EventException($e->getMessage(), NULL, $e);
-			}
-
-		} elseif (preg_match('~^https?://.+~', $runner)) {
-			$this->progress->log(sprintf('Running job: %s', $runner));
-
-			$response = @file_get_contents($runner);
-			if ($response === FALSE) {
-				throw new EventException(sprintf('Request failed.'));
-			}
-
-		} else {
-			throw new \RuntimeException('Cannot trigger Event. Unsupported runner given.');
+		if (!$job instanceof Job) {
+			$job = $this->createJob($job);
 		}
+
+		$this->progress->log(sprintf('Running job: %s', $job->getName()));
+
+		try {
+			$job->run();
+		} catch (\Throwable $e) {
+			throw new EventException($e->getMessage(), NULL, $e);
+		}
+	}
+
+	private function createJob($input):Job
+	{
+		if (preg_match('~^https?://.+~', $input)) {
+			return new GetRequestJob($input);
+		}
+
+		throw new EventException('Cannot create a Job instance.');
 	}
 
 }
