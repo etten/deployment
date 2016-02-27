@@ -60,6 +60,10 @@ class DeploymentCommand extends Console\Command\Command
 
 		// Show only the list?
 		if ($input->getOption('list')) {
+			$this->progress->log('SHOWING LIST OF FILES ONLY.');
+			$this->progress->log('Nothing will be uploaded or deleted on the server.');
+			$this->progress->log('');
+
 			$this->showList($toUpload, $toDelete);
 			return;
 		}
