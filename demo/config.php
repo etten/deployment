@@ -25,7 +25,11 @@ return [
 	'events' => new Events([
 		'onStart' => [],
 		'onBeforeUpload' => [],
-		'onBeforeMove' => [],
-		'onFinish' => [],
+		'onBeforeMove' => [
+			'http://hranicka.cz/service/deploy?event=beforeMove',
+		],
+		'onFinish' => [
+			'http://hranicka.cz/service/deploy?event=finish',
+		],
 	]),
 ];

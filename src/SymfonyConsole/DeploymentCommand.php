@@ -110,6 +110,7 @@ class DeploymentCommand extends Console\Command\Command
 		$config = (array)require $file;
 
 		$this->events = $this->getConfigObject($config, 'events', Deployment\Events::class);
+		$this->events->setProgress($this->progress);
 
 		$this->deployer = $this->getConfigObject($config, 'deployer', Deployment\Deployer::class);
 		$this->deployer->setProgress($this->progress);
