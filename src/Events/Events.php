@@ -5,9 +5,10 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment;
+namespace Etten\Deployment\Events;
 
-use Etten\Deployment\Exceptions\EventException;
+use Etten\Deployment\Progress;
+use Etten\Deployment\VoidProgress;
 
 class Events
 {

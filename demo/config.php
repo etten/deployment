@@ -22,7 +22,7 @@ return [
 		]),
 		new FileList()
 	),
-	'events' => new Events([
+	'events' => new Events\Events([
 		'onStart' => [],
 		'onBeforeUpload' => [],
 		'onBeforeMove' => [

@@ -7,9 +7,6 @@
 
 namespace Etten\Deployment;
 
-use Etten\Deployment\Exceptions\Exception;
-use Etten\Deployment\Exceptions\FtpException;
-
 class FtpServer implements Server
 {
 

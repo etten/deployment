@@ -7,8 +7,6 @@
 
 namespace Etten\Deployment;
 
-use Etten\Deployment\Exceptions\Exception;
-
 class Deployer
 {
 

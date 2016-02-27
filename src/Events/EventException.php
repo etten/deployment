@@ -5,9 +5,11 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment\Exceptions;
+namespace Etten\Deployment\Events;
 
-class Exception extends \Exception
+use Etten\Deployment\Exception;
+
+class EventException extends Exception
 {
 
 }

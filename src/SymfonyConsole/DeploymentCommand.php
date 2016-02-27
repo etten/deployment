@@ -16,7 +16,7 @@ class DeploymentCommand extends Console\Command\Command
 	/** @var Deployment\Progress */
 	private $progress;
 
-	/** @var Deployment\Events */
+	/** @var \Etten\Deployment\Events\Events */
 	private $events;
 
 	/** @var Deployment\Deployer */
@@ -109,7 +109,7 @@ class DeploymentCommand extends Console\Command\Command
 	{
 		$config = (array)require $file;
 
-		$this->events = $this->getConfigObject($config, 'events', Deployment\Events::class);
+		$this->events = $this->getConfigObject($config, 'events', Deployment\Events\Events::class);
 		$this->events->setProgress($this->progress);
 
 		$this->deployer = $this->getConfigObject($config, 'deployer', Deployment\Deployer::class);

@@ -5,9 +5,9 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment\Exceptions;
+namespace Etten\Deployment;
 
-class EventException extends Exception
+class Exception extends \Exception
 {
 
 }
