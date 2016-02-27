@@ -13,63 +13,87 @@ use Symfony\Component\Console;
 class DeploymentCommand extends Console\Command\Command
 {
 
-	/** @var Deployment\Progress */
-	private $progress;
-
-	/** @var \Etten\Deployment\Events\Events */
+	/** @var Deployment\Events\Events */
 	private $events;
 
 	/** @var Deployment\Deployer */
 	private $deployer;
 
-	/** @var bool */
-	private $listOnly = FALSE;
+	/**
+	 * @param Deployment\Events\Events $events
+	 * @return $this
+	 */
+	public function setEvents(Deployment\Events\Events $events)
+	{
+		$this->events = $events;
+		return $this;
+	}
+
+	/**
+	 * @param Deployment\Deployer $deployer
+	 * @return $this
+	 */
+	public function setDeployer(Deployment\Deployer $deployer)
+	{
+		$this->deployer = $deployer;
+		return $this;
+	}
 
 	protected function configure()
 	{
 		$this
 			->setName('deployment')
 			->setDescription('Deploys the application on remote server given by config.')
-			->addArgument('config', Console\Input\InputArgument::REQUIRED, 'Path to Deployer factory file.')
+			->addOption('config', 'c', Console\Input\InputOption::VALUE_REQUIRED, 'Path to config file.')
 			->addOption('list', 'l', Console\Input\InputOption::VALUE_NONE, 'Returns only list of files to upload and delete.');
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
 	{
-		$this->loadConfig($input);
+		$configFile = $input->getOption('config');
+		if ($configFile) {
+			$this->loadConfigFromPhpFile($configFile);
+		}
+
+		$this->validateState();
+
+		$progress = new Progress($this, $input, $output);
+		$this->events->setProgress($progress);
+		$this->deployer->setProgress($progress);
 
 		$deployment = new Deployment\Runner(
-			new Progress($this, $input, $output),
+			$progress,
 			$this->events,
 			$this->deployer
 		);
 
-		$deployment->setListOnly($this->listOnly);
+		$deployment->setListOnly($input->getOption('list'));
 
 		$deployment->run();
 	}
 
-	private function loadConfig(Console\Input\InputInterface $input)
+	private function loadConfigFromPhpFile($file)
 	{
-		$config = (array)require $input->getArgument('config');
-
-		$this->events = $this->getConfigObject($config, 'events', Deployment\Events\Events::class);
-		$this->events->setProgress($this->progress);
-
-		$this->deployer = $this->getConfigObject($config, 'deployer', Deployment\Deployer::class);
-		$this->deployer->setProgress($this->progress);
-
-		$this->listOnly = (bool)$input->getOption('list');
+		$config = require $file;
+		$this->loadConfig($config);
 	}
 
-	private function getConfigObject(array $config, string $name, string $class)
+	private function loadConfig(array $config)
 	{
-		$object = $config[$name] ?? NULL;
-		if (!$object || !is_a($object, $class)) {
-			throw new \RuntimeException(sprintf('Given config %s is not instance of %s.', $name, $class));
+		if (isset($config['events']) && $config['events'] instanceof Deployment\Events\Events) {
+			$this->setEvents($config['events']);
 		}
 
-		return $object;
+		if (isset($config['deployer']) && $config['deployer'] instanceof Deployment\Deployer) {
+			$this->setDeployer($config['deployer']);
+		}
+	}
+
+	private function validateState()
+	{
+		if (!$this->events || !$this->deployer) {
+			throw new \RuntimeException('Config is not correct or has not been set.');
+		}
 	}
 
 }
