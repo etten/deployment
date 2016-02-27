@@ -111,28 +111,18 @@ class Deployer
 
 	public function moveFiles(array $files)
 	{
-		ksort($files); // Sort A-Z by file name - directory before file
+		krsort($files); // Sort Z-A by file name - file before directory
 
 		$count = count($files);
 		$progress = 0;
 
 		foreach ($files as $file => $hash) {
 			$this->progress->log(sprintf('Moving [%d/%d] %s', ++$progress, $count, $file));
-			$isDir = substr($file, -1) === '/';
 
-			if ($isDir) {
-				// Create a new directory
-				$this->server->write(
-					$this->mergePaths($this->getRemoteBasePath(), $file),
-					$this->mergePaths($this->collector->basePath(), $file)
-				);
-			} else {
-				// Rename file
-				$this->server->rename(
-					$this->mergePaths($this->getRemoteTempPath(), $file),
-					$this->mergePaths($this->getRemoteBasePath(), $file)
-				);
-			}
+			$this->server->rename(
+				$this->mergePaths($this->getRemoteTempPath(), $file),
+				$this->mergePaths($this->getRemoteBasePath(), $file)
+			);
 		}
 	}
 
