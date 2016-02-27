@@ -57,8 +57,17 @@ class FtpServer implements Server
 
 	public function rename(string $originalPath, string $newPath)
 	{
-		$this->remove($newPath);
-		$this->ftp('rename', [$originalPath, $newPath]);
+		try {
+			if ($this->isDirectory($originalPath)) {
+				$this->renameDirectory($originalPath, $newPath);
+			} else {
+				$this->renameFile($originalPath, $newPath);
+			}
+		} catch (FtpException $e) {
+			if ($this->ftp('nlist', [$originalPath])) {
+				throw $e;
+			}
+		}
 	}
 
 	public function remove(string $remotePath)
@@ -74,6 +83,53 @@ class FtpServer implements Server
 				throw $e;
 			}
 		}
+	}
+
+	private function renameFile(string $originalPath, string $newPath)
+	{
+		// directory must be created before file
+		$parts = explode('/', $newPath);
+		array_pop($parts); // strip file name
+		$directory = rtrim(implode('/', $parts), '/') . '/';
+
+		if (!$this->isDirectoryExists($directory)) {
+			$this->writeDirectory($directory);
+		}
+
+		// directory exists, rename the file
+		$this->ftp('rename', [$originalPath, $newPath]);
+	}
+
+	private function renameDirectory(string $originalPath, string $newPath)
+	{
+		// Create a new directory
+		$this->writeDirectory($newPath);
+
+		// Walk directory contents
+		$list = $this->ftp('nlist', [$originalPath]);
+
+		foreach ($list as $item) {
+			// Skip current and previous directory mark
+			if (in_array($item, ['.', '..'])) {
+				continue;
+			}
+
+			// Build full file path
+			$originalItemPath = rtrim($originalPath, '/') . '/' . $item;
+			$newItemPath = rtrim($newPath, '/') . '/' . $item;
+
+			// If is a directory, add directory separator to the end
+			if ($this->isDirectoryExists($originalItemPath)) {
+				$originalItemPath .= '/';
+				$newItemPath .= '/';
+			}
+
+			// Rename current item
+			$this->rename($originalItemPath, $newItemPath);
+		}
+
+		// All directory contents should be renamed, delete it
+		$this->removeDirectory($originalPath);
 	}
 
 	private function removeFile(string $path)
