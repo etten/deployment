@@ -22,6 +22,9 @@ class DeploymentCommand extends Console\Command\Command
 	/** @var Deployment\Deployer */
 	private $deployer;
 
+	/** @var bool */
+	private $listOnly = FALSE;
+
 	protected function configure()
 	{
 		$this
@@ -33,113 +36,30 @@ class DeploymentCommand extends Console\Command\Command
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
 	{
-		$this->progress = new Progress($this, $input, $output);
-		$this->loadConfig($input->getArgument('config'));
+		$this->loadConfig($input);
 
-		$this->deployer->checkPrevious();
+		$deployment = new Deployment\Runner(
+			new Progress($this, $input, $output),
+			$this->events,
+			$this->deployer
+		);
 
-		$this->progress->log(sprintf('Started at %s', date('r')));
-		$this->progress->log('');
-		$this->events->start();
+		$deployment->setListOnly($this->listOnly);
 
-		// Collect files
-		$localFiles = $this->deployer->findLocalFiles();
-
-		$this->progress->log(sprintf('%d local files and directories found.', count($localFiles)));
-
-		$deployedFiles = $this->deployer->findDeployedFiles();
-		$this->progress->log(sprintf('%d deployed files and directories found.', count($deployedFiles)));
-
-		$toUpload = $this->deployer->filterFilesToDeploy($localFiles, $deployedFiles);
-		$this->progress->log(sprintf('%d files and directories to upload.', count($toUpload)));
-
-		$toDelete = $this->deployer->filterFilesToDelete($localFiles, $deployedFiles);
-		$this->progress->log(sprintf('%d files and directories to delete.', count($toDelete)));
-
-		$this->progress->log('');
-
-		// Show only the list?
-		if ($input->getOption('list')) {
-			$this->progress->log('SHOWING LIST OF FILES ONLY.');
-			$this->progress->log('Nothing will be uploaded or deleted on the server.');
-			$this->progress->log('');
-
-			$this->showList($toUpload, $toDelete);
-			return;
-		}
-
-		// Upload all new files
-		if ($toUpload) {
-			$this->events->beforeUpload();
-			$this->deployer->uploadFiles($toUpload);
-		}
-
-		$this->progress->log(sprintf('%d files and directories uploaded.', count($toUpload)));
-		$this->progress->log('');
-
-		// Create & Upload File Lists
-		if ($toUpload || $toDelete) {
-			$this->deployer->writeDeployedList($localFiles);
-		}
-
-		if ($toDelete) {
-			$this->deployer->writeDeletedList($toDelete);
-		}
-
-		// Move uploaded files
-		if ($toUpload) {
-			$this->events->beforeMove();
-			$this->deployer->moveFiles($toUpload);
-		}
-
-		$this->progress->log(sprintf('%d files and directories moved from temp to production.', count($toUpload)));
-		$this->progress->log('');
-
-		// Move Deployed File List
-		if ($toUpload || $toDelete) {
-			$this->deployer->moveDeployedList();
-		}
-
-		// Delete not tracked files
-		if ($toDelete) {
-			$this->deployer->deleteFiles($toDelete);
-		}
-
-		$this->progress->log(sprintf('%d files and directories deleted.', count($toDelete)));
-		$this->progress->log('');
-
-		// Clean .deploy directory
-		if ($toUpload || $toDelete) {
-			$this->deployer->clean();
-		}
-
-		$this->events->finish();
+		$deployment->run();
 	}
 
-	private function showList(array $toUpload, array $toDelete)
+	private function loadConfig(Console\Input\InputInterface $input)
 	{
-		foreach ($toUpload as $file => $hash) {
-			$this->progress->log(sprintf('To upload: %s', $file));
-		}
-
-		$this->progress->log('');
-
-		foreach ($toDelete as $file => $hash) {
-			$this->progress->log(sprintf('To delete: %s', $file));
-		}
-
-		$this->progress->log('');
-	}
-
-	private function loadConfig($file)
-	{
-		$config = (array)require $file;
+		$config = (array)require $input->getArgument('config');
 
 		$this->events = $this->getConfigObject($config, 'events', Deployment\Events\Events::class);
 		$this->events->setProgress($this->progress);
 
 		$this->deployer = $this->getConfigObject($config, 'deployer', Deployment\Deployer::class);
 		$this->deployer->setProgress($this->progress);
+
+		$this->listOnly = (bool)$input->getOption('list');
 	}
 
 	private function getConfigObject(array $config, string $name, string $class)
