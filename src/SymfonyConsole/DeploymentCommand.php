@@ -27,7 +27,8 @@ class DeploymentCommand extends Console\Command\Command
 		$this
 			->setName('deployment')
 			->setDescription('Deploys the application on remote server given by config.')
-			->addArgument('config', Console\Input\InputArgument::REQUIRED, 'Path to Deployer factory file.');
+			->addArgument('config', Console\Input\InputArgument::REQUIRED, 'Path to Deployer factory file.')
+			->addOption('list', 'l', Console\Input\InputOption::VALUE_NONE, 'Returns only list of files to upload and delete.');
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
@@ -56,6 +57,12 @@ class DeploymentCommand extends Console\Command\Command
 		$this->progress->log(sprintf('%d files and directories to delete.', count($toDelete)));
 
 		$this->progress->log('');
+
+		// Show only the list?
+		if ($input->getOption('list')) {
+			$this->showList($toUpload, $toDelete);
+			return;
+		}
 
 		// Upload all new files
 		if ($toUpload) {
@@ -103,6 +110,21 @@ class DeploymentCommand extends Console\Command\Command
 		}
 
 		$this->events->finish();
+	}
+
+	private function showList(array $toUpload, array $toDelete)
+	{
+		foreach ($toUpload as $file => $hash) {
+			$this->progress->log(sprintf('To upload: %s', $file));
+		}
+
+		$this->progress->log('');
+
+		foreach ($toDelete as $file => $hash) {
+			$this->progress->log(sprintf('To delete: %s', $file));
+		}
+
+		$this->progress->log('');
 	}
 
 	private function loadConfig($file)
