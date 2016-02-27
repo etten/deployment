@@ -36,7 +36,7 @@ class Runner
 	 * @param boolean $listOnly
 	 * @return $this
 	 */
-	public function setListOnly(boolean $listOnly)
+	public function setListOnly(bool $listOnly)
 	{
 		$this->listOnly = $listOnly;
 		return $this;
