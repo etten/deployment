@@ -13,8 +13,8 @@ use Symfony\Component\Console;
 class DeploymentCommand extends Console\Command\Command
 {
 
-	/** @var Deployment\Logger */
-	private $logger;
+	/** @var Deployment\Progress */
+	private $progress;
 
 	/** @var Deployment\Events */
 	private $events;
@@ -32,30 +32,30 @@ class DeploymentCommand extends Console\Command\Command
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
 	{
-		$this->logger = new ConsoleLogger($output);
+		$this->progress = new Progress($this, $input, $output);
 		$this->loadConfig($input->getArgument('config'));
 
 		$this->deployer->checkPrevious();
 
-		$this->logger->log(sprintf('Started at %s', date('r')));
-		$this->logger->log('');
+		$this->progress->log(sprintf('Started at %s', date('r')));
+		$this->progress->log('');
 		$this->events->start();
 
 		// Collect files
 		$localFiles = $this->deployer->findLocalFiles();
 
-		$this->logger->log(sprintf('%d local files and directories found.', count($localFiles)));
+		$this->progress->log(sprintf('%d local files and directories found.', count($localFiles)));
 
 		$deployedFiles = $this->deployer->findDeployedFiles();
-		$this->logger->log(sprintf('%d deployed files and directories found.', count($deployedFiles)));
+		$this->progress->log(sprintf('%d deployed files and directories found.', count($deployedFiles)));
 
 		$toUpload = $this->deployer->filterFilesToDeploy($localFiles, $deployedFiles);
-		$this->logger->log(sprintf('%d files and directories to upload.', count($toUpload)));
+		$this->progress->log(sprintf('%d files and directories to upload.', count($toUpload)));
 
 		$toDelete = $this->deployer->filterFilesToDelete($localFiles, $deployedFiles);
-		$this->logger->log(sprintf('%d files and directories to delete.', count($toDelete)));
+		$this->progress->log(sprintf('%d files and directories to delete.', count($toDelete)));
 
-		$this->logger->log('');
+		$this->progress->log('');
 
 		// Upload all new files
 		if ($toUpload) {
@@ -63,8 +63,8 @@ class DeploymentCommand extends Console\Command\Command
 			$this->deployer->uploadFiles($toUpload);
 		}
 
-		$this->logger->log(sprintf('%d files and directories uploaded.', count($toUpload)));
-		$this->logger->log('');
+		$this->progress->log(sprintf('%d files and directories uploaded.', count($toUpload)));
+		$this->progress->log('');
 
 		// Create & Upload File Lists
 		if ($toUpload || $toDelete) {
@@ -81,8 +81,8 @@ class DeploymentCommand extends Console\Command\Command
 			$this->deployer->moveFiles($toUpload);
 		}
 
-		$this->logger->log(sprintf('%d files and directories moved from temp to production.', count($toUpload)));
-		$this->logger->log('');
+		$this->progress->log(sprintf('%d files and directories moved from temp to production.', count($toUpload)));
+		$this->progress->log('');
 
 		// Move Deployed File List
 		if ($toUpload || $toDelete) {
@@ -94,8 +94,8 @@ class DeploymentCommand extends Console\Command\Command
 			$this->deployer->deleteFiles($toDelete);
 		}
 
-		$this->logger->log(sprintf('%d files and directories deleted.', count($toDelete)));
-		$this->logger->log('');
+		$this->progress->log(sprintf('%d files and directories deleted.', count($toDelete)));
+		$this->progress->log('');
 
 		// Clean .deploy directory
 		if ($toUpload || $toDelete) {
@@ -112,7 +112,7 @@ class DeploymentCommand extends Console\Command\Command
 		$this->events = $this->getConfigObject($config, 'events', Deployment\Events::class);
 
 		$this->deployer = $this->getConfigObject($config, 'deployer', Deployment\Deployer::class);
-		$this->deployer->setLogger($this->logger);
+		$this->deployer->setProgress($this->progress);
 	}
 
 	private function getConfigObject(array $config, string $name, string $class)

@@ -21,14 +21,14 @@ class FileCollector implements Collector
 		'.DS_Store',
 	];
 
-	/** @var Logger */
-	private $logger;
+	/** @var Progress */
+	private $progress;
 
 	public function __construct(array $config)
 	{
 		$this->basePath = $config['path'];
 		$this->ignoreMasks = array_merge($this->ignoreMasks, $config['ignore']);
-		$this->logger = new VoidLogger();
+		$this->progress = new VoidProgress();
 	}
 
 	/**
@@ -40,12 +40,12 @@ class FileCollector implements Collector
 	}
 
 	/**
-	 * @param Logger $logger
+	 * @param Progress $progress
 	 * @return $this
 	 */
-	public function setLogger(Logger $logger)
+	public function setProgress(Progress $progress)
 	{
-		$this->logger = $logger;
+		$this->progress = $progress;
 		return $this;
 	}
 
@@ -55,14 +55,14 @@ class FileCollector implements Collector
 	public function collect():array
 	{
 		$files = $this->collectRecursively('');
-		$this->logger->log('');
+		$this->progress->log('');
 
 		return $files;
 	}
 
 	private function collectRecursively($directory = ''):array
 	{
-		$this->logger->log(sprintf('Checking %s', $directory ?: '/'));
+		$this->progress->log(sprintf('Checking %s', $directory ?: '/'));
 
 		$list = [];
 		$iterator = dir($this->basePath . $directory);

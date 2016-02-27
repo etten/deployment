@@ -29,8 +29,8 @@ class Deployer
 	/** @var FileList */
 	private $fileList;
 
-	/** @var Logger */
-	private $logger;
+	/** @var Progress */
+	private $progress;
 
 	public function __construct(
 		array $config,
@@ -42,17 +42,17 @@ class Deployer
 		$this->server = $server;
 		$this->collector = $collector;
 		$this->fileList = $fileList;
-		$this->logger = new VoidLogger();
+		$this->progress = new VoidProgress();
 	}
 
 	/**
-	 * @param Logger $logger
+	 * @param Progress $progress
 	 * @return $this
 	 */
-	public function setLogger(Logger $logger)
+	public function setProgress(Progress $progress)
 	{
-		$this->logger = $logger;
-		$this->collector->setLogger($logger);
+		$this->progress = $progress;
+		$this->collector->setProgress($progress);
 		return $this;
 	}
 
@@ -103,7 +103,7 @@ class Deployer
 		$progress = 0;
 
 		foreach ($files as $file => $hash) {
-			$this->logger->log(sprintf('Uploading [%d/%d] %s', ++$progress, $count, $file));
+			$this->progress->log(sprintf('Uploading [%d/%d] %s', ++$progress, $count, $file));
 			$this->server->write(
 				$this->mergePaths($this->getRemoteTempPath(), $file),
 				$this->mergePaths($this->collector->basePath(), $file)
@@ -119,7 +119,7 @@ class Deployer
 		$progress = 0;
 
 		foreach ($files as $file => $hash) {
-			$this->logger->log(sprintf('Moving [%d/%d] %s', ++$progress, $count, $file));
+			$this->progress->log(sprintf('Moving [%d/%d] %s', ++$progress, $count, $file));
 			$isDir = substr($file, -1) === '/';
 
 			if ($isDir) {
@@ -144,7 +144,7 @@ class Deployer
 		$progress = 0;
 
 		foreach ($files as $file => $hash) {
-			$this->logger->log(sprintf('Deleting [%d/%d] %s', ++$progress, $count, $file));
+			$this->progress->log(sprintf('Deleting [%d/%d] %s', ++$progress, $count, $file));
 
 			$this->server->remove(
 				$this->mergePaths($this->getRemoteBasePath(), $file)
