@@ -14,7 +14,7 @@ return [
 			'host' => 'demo.hranicka.cz',
 			'user' => 'demo.hranicka.cz',
 			'password' => 'demo1.',
-			'secured' => FALSE,
+			'secured' => TRUE,
 		]),
 		new FileCollector([
 			'path' => __DIR__ . '/../',

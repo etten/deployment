@@ -1,0 +1,26 @@
+extensions:
+	deployment: Etten\Deployment\NetteExtension\DeploymentExtension
+
+deployment:
+	ftp:
+		host: demo.hranicka.cz
+		user: demo.hranicka.cz
+		password: 'demo1.'
+		secured: yes
+
+	paths:
+		local: %appDir%/..
+		remote: /web
+		ignore:
+			- /.idea
+
+	jobs:
+		onStart:
+
+		onBeforeUpload:
+
+		onBeforeMove:
+			- 'http://hranicka.cz/service/deploy?job=beforeMove'
+
+		onFinish:
+			- 'http://hranicka.cz/service/deploy?job=finish'
