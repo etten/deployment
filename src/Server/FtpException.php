@@ -5,7 +5,9 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment;
+namespace Etten\Deployment\Server;
+
+use Etten\Deployment\Exception;
 
 class FtpException extends Exception
 {

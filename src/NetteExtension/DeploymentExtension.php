@@ -49,7 +49,7 @@ class DeploymentExtension extends DI\CompilerExtension
 
 		$builder
 			->addDefinition($this->prefix('server'))
-			->setClass(Deployment\FtpServer::class, [$this->config['ftp']])
+			->setClass(Deployment\Server\FtpServer::class, [$this->config['ftp']])
 			->setAutowired(FALSE);
 
 		$builder

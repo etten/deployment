@@ -10,7 +10,7 @@ return [
 			'deployedFile' => '/.deployed',
 			'deletedFile' => '/.deleted',
 		],
-		new FtpServer([
+		new Server\FtpServer([
 			'host' => 'demo.hranicka.cz',
 			'user' => 'demo.hranicka.cz',
 			'password' => 'demo1.',

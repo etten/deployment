@@ -5,7 +5,9 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment;
+namespace Etten\Deployment\Server;
+
+use Etten\Deployment\TempFile;
 
 class FtpServer implements Server
 {
@@ -180,7 +182,7 @@ class FtpServer implements Server
 		}
 
 		if (!extension_loaded('ftp')) {
-			throw new Exception('PHP extension FTP is not loaded.');
+			throw new FtpException('PHP extension FTP is not loaded.');
 		}
 
 		$this->connection = $this->protect(

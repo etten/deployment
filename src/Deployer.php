@@ -18,7 +18,7 @@ class Deployer
 		'deletedFile' => '/.deleted',
 	];
 
-	/** @var Server */
+	/** @var Server\Server */
 	private $server;
 
 	/** @var Collector */
@@ -32,7 +32,7 @@ class Deployer
 
 	public function __construct(
 		array $config,
-		Server $server,
+		Server\Server $server,
 		Collector $collector,
 		FileList $fileList
 	) {
