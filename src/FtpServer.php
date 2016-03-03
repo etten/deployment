@@ -25,10 +25,6 @@ class FtpServer implements Server
 
 	public function __construct(array $config)
 	{
-		if (!extension_loaded('ftp')) {
-			throw new Exception('PHP extension FTP is not loaded.');
-		}
-
 		$this->config = array_merge($this->config, $config);
 	}
 
@@ -181,6 +177,10 @@ class FtpServer implements Server
 	{
 		if ($this->connection) {
 			return;
+		}
+
+		if (!extension_loaded('ftp')) {
+			throw new Exception('PHP extension FTP is not loaded.');
 		}
 
 		$this->connection = $this->protect(
