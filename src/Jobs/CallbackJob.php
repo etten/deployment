@@ -5,7 +5,7 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment\Events;
+namespace Etten\Deployment\Jobs;
 
 class CallbackJob implements Job
 {

@@ -22,14 +22,14 @@ return [
 		]),
 		new FileList()
 	),
-	'events' => new Events\Events([
+	'jobs' => new Jobs\Jobs([
 		'onStart' => [],
 		'onBeforeUpload' => [],
 		'onBeforeMove' => [
-			'http://hranicka.cz/service/deploy?event=beforeMove',
+			'http://hranicka.cz/service/deploy?job=beforeMove',
 		],
 		'onFinish' => [
-			'http://hranicka.cz/service/deploy?event=finish',
+			'http://hranicka.cz/service/deploy?job=finish',
 		],
 	]),
 ];

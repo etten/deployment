@@ -5,12 +5,12 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment\Events;
+namespace Etten\Deployment\Jobs;
 
 use Etten\Deployment\Progress;
 use Etten\Deployment\VoidProgress;
 
-class Events
+class Jobs
 {
 
 	/** @var Job[] */
@@ -73,7 +73,7 @@ class Events
 			try {
 				$this->runJob($job);
 
-			} catch (EventException $e) {
+			} catch (JobException $e) {
 				$this->progress->log(sprintf('Job failed with message: %s', $e->getMessage()));
 				$continue = $this->progress->ask('Continue anyway?', TRUE);
 				if (!$continue) {
@@ -85,7 +85,7 @@ class Events
 
 	/**
 	 * @param Job|mixed $job
-	 * @throws EventException
+	 * @throws JobException
 	 */
 	private function runJob($job)
 	{
@@ -108,7 +108,7 @@ class Events
 		try {
 			$job->run();
 		} catch (\Throwable $e) {
-			throw new EventException($e->getMessage(), NULL, $e);
+			throw new JobException($e->getMessage(), NULL, $e);
 		}
 	}
 
@@ -118,7 +118,7 @@ class Events
 			return new GetRequestJob($input);
 		}
 
-		throw new EventException('Cannot create a Job instance.');
+		throw new JobException('Cannot create a Job instance.');
 	}
 
 }

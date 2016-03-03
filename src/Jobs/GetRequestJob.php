@@ -5,7 +5,7 @@
  * Copyright © 2016 Jaroslav Hranička <hranicka@outlook.com>
  */
 
-namespace Etten\Deployment\Events;
+namespace Etten\Deployment\Jobs;
 
 class GetRequestJob implements Job
 {
@@ -27,7 +27,7 @@ class GetRequestJob implements Job
 	{
 		$response = @file_get_contents($this->url);
 		if ($response === FALSE) {
-			throw new EventException(sprintf('Request failed.'));
+			throw new JobException(sprintf('Request failed.'));
 		}
 	}
 

@@ -13,19 +13,19 @@ use Symfony\Component\Console;
 class DeploymentCommand extends Console\Command\Command
 {
 
-	/** @var Deployment\Events\Events */
-	private $events;
+	/** @var Deployment\Jobs\Jobs */
+	private $jobs;
 
 	/** @var Deployment\Deployer */
 	private $deployer;
 
 	/**
-	 * @param Deployment\Events\Events $events
+	 * @param Deployment\Jobs\Jobs $jobs
 	 * @return $this
 	 */
-	public function setEvents(Deployment\Events\Events $events)
+	public function setJobs(Deployment\Jobs\Jobs $jobs)
 	{
-		$this->events = $events;
+		$this->jobs = $jobs;
 		return $this;
 	}
 
@@ -58,12 +58,12 @@ class DeploymentCommand extends Console\Command\Command
 		$this->validateState();
 
 		$progress = new Progress($this, $input, $output);
-		$this->events->setProgress($progress);
+		$this->jobs->setProgress($progress);
 		$this->deployer->setProgress($progress);
 
 		$deployment = new Deployment\Runner(
 			$progress,
-			$this->events,
+			$this->jobs,
 			$this->deployer
 		);
 
@@ -80,8 +80,8 @@ class DeploymentCommand extends Console\Command\Command
 
 	private function loadConfig(array $config)
 	{
-		if (isset($config['events']) && $config['events'] instanceof Deployment\Events\Events) {
-			$this->setEvents($config['events']);
+		if (isset($config['jobs']) && $config['jobs'] instanceof Deployment\Jobs\Jobs) {
+			$this->setJobs($config['jobs']);
 		}
 
 		if (isset($config['deployer']) && $config['deployer'] instanceof Deployment\Deployer) {
@@ -91,7 +91,7 @@ class DeploymentCommand extends Console\Command\Command
 
 	private function validateState()
 	{
-		if (!$this->events || !$this->deployer) {
+		if (!$this->jobs || !$this->deployer) {
 			throw new \RuntimeException('Config is not correct or has not been set.');
 		}
 	}

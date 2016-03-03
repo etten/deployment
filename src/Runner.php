@@ -13,8 +13,8 @@ class Runner
 	/** @var Progress */
 	private $progress;
 
-	/** @var Events\Events */
-	private $events;
+	/** @var Jobs\Jobs */
+	private $jobs;
 
 	/** @var Deployer */
 	private $deployer;
@@ -24,11 +24,11 @@ class Runner
 
 	public function __construct(
 		Progress $progress,
-		Events\Events $events,
+		Jobs\Jobs $jobs,
 		Deployer $deployer
 	) {
 		$this->progress = $progress;
-		$this->events = $events;
+		$this->jobs = $jobs;
 		$this->deployer = $deployer;
 	}
 
@@ -48,7 +48,7 @@ class Runner
 
 		$this->progress->log(sprintf('Started at %s', date('r')));
 		$this->progress->log('');
-		$this->events->start();
+		$this->jobs->start();
 
 		// Collect files
 		$localFiles = $this->deployer->findLocalFiles();
@@ -78,7 +78,7 @@ class Runner
 
 		// Upload all new files
 		if ($toUpload) {
-			$this->events->beforeUpload();
+			$this->jobs->beforeUpload();
 			$this->deployer->uploadFiles($toUpload);
 		}
 
@@ -96,7 +96,7 @@ class Runner
 
 		// Move uploaded files
 		if ($toUpload) {
-			$this->events->beforeMove();
+			$this->jobs->beforeMove();
 			$this->deployer->moveFiles($toUpload);
 		}
 
@@ -121,7 +121,7 @@ class Runner
 			$this->deployer->clean();
 		}
 
-		$this->events->finish();
+		$this->jobs->finish();
 	}
 
 	private function showList(array $toUpload, array $toDelete)
