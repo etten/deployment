@@ -67,7 +67,7 @@ class Events
 		$this->invoke($this->onFinish);
 	}
 
-	private function invoke(array $jobs)
+	private function invoke($jobs)
 	{
 		foreach ($jobs as $job) {
 			try {
@@ -89,6 +89,16 @@ class Events
 	 */
 	private function runJob($job)
 	{
+		// Kdyby\Events support
+		if ($job instanceof \Closure) {
+			$job = $job->__invoke();
+
+			if (!$job) {
+				return;
+			}
+		}
+
+		// Convert to a Job instance.
 		if (!$job instanceof Job) {
 			$job = $this->createJob($job);
 		}
