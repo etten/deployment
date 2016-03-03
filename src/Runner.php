@@ -20,7 +20,7 @@ class Runner
 	private $deployer;
 
 	/** @var bool */
-	private $listOnly = FALSE;
+	private $testOnly = FALSE;
 
 	public function __construct(
 		Progress $progress,
@@ -33,12 +33,12 @@ class Runner
 	}
 
 	/**
-	 * @param boolean $listOnly
+	 * @param boolean $testOnly
 	 * @return $this
 	 */
-	public function setListOnly(bool $listOnly)
+	public function setTestOnly(bool $testOnly)
 	{
-		$this->listOnly = $listOnly;
+		$this->testOnly = $testOnly;
 		return $this;
 	}
 
@@ -67,7 +67,7 @@ class Runner
 		$this->progress->log('');
 
 		// Show only the list?
-		if ($this->listOnly) {
+		if ($this->testOnly) {
 			$this->progress->log('SHOWING LIST OF FILES ONLY.');
 			$this->progress->log('Nothing will be uploaded or deleted on the server.');
 			$this->progress->log('');

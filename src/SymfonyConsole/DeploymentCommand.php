@@ -45,7 +45,7 @@ class DeploymentCommand extends Console\Command\Command
 			->setName('deployment')
 			->setDescription('Deploys the application on remote server given by config.')
 			->addOption('config', 'c', Console\Input\InputOption::VALUE_REQUIRED, 'Path to config file.')
-			->addOption('list', 'l', Console\Input\InputOption::VALUE_NONE, 'Returns only list of files to upload and delete.');
+			->addOption('test', 't', Console\Input\InputOption::VALUE_NONE, 'Does not really upload or delete files, just get list of them.');
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
@@ -67,7 +67,7 @@ class DeploymentCommand extends Console\Command\Command
 			$this->deployer
 		);
 
-		$deployment->setListOnly($input->getOption('list'));
+		$deployment->setTestOnly($input->getOption('test'));
 
 		$deployment->run();
 	}
