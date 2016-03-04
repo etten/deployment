@@ -2,6 +2,10 @@
 
 namespace Etten\Deployment;
 
+$host = 'hranicka.cz';
+$user = 'demo.hranicka.cz';
+$password = 'demo1.';
+
 return [
 	'deployer' => new Deployer(
 		[
@@ -11,9 +15,9 @@ return [
 			'deletedFile' => '/.deleted',
 		],
 		new Server\FtpServer([
-			'host' => 'demo.hranicka.cz',
-			'user' => 'demo.hranicka.cz',
-			'password' => 'demo1.',
+			'host' => $host,
+			'user' => $user,
+			'password' => $password,
 			'secured' => TRUE,
 		]),
 		new FileCollector([
@@ -26,10 +30,10 @@ return [
 		'onStart' => [],
 		'onBeforeUpload' => [],
 		'onBeforeMove' => [
-			'http://hranicka.cz/service/deploy?job=beforeMove',
+			"https://$host/service/deploy?job=beforeMove",
 		],
 		'onFinish' => [
-			'http://hranicka.cz/service/deploy?job=finish',
+			"https://$host/service/deploy?job=finish",
 		],
 	]),
 ];
