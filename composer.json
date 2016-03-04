@@ -1,7 +1,8 @@
 {
     "name": "etten/deployment",
-    "description": "Nette Application Deployment Tool",
+    "description": "PHP Deployment Tool",
     "license": "MIT",
+    "keywords": ["php", "deployment", "upload", "nette"],
     "authors": [
         {
             "name": "Jaroslav Hranička",
