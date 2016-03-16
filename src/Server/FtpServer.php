@@ -237,21 +237,21 @@ class FtpServer implements Server
 	{
 		$currentDir = $this->ftp('pwd');
 
-		$exists = $this->runRetry(function () use ($path, $currentDir) {
-			$exists = FALSE;
-
+		$exists = $this->runRetry(function () use ($path) {
 			try {
-				$exists = $this->ftp('chdir', [$path]);
+				return $this->ftp('chdir', [$path]);
 			} catch (FtpException $e) {
 				// Ignore error when directory is not exists
 				if (strpos($e->getMessage(), 'No such file or directory') === FALSE) {
 					throw $e;
 				}
+
+				return FALSE;
 			}
+		});
 
+		$this->runRetry(function () use ($currentDir) {
 			$this->ftp('chdir', [$currentDir ?: '/']);
-
-			return $exists;
 		});
 
 		return $exists;
