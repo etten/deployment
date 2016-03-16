@@ -49,13 +49,13 @@ class DeploymentExtension extends DI\CompilerExtension
 		}
 	}
 
-	private function addEnvironment($name, array $config)
+	private function addEnvironment(string $name, array $config)
 	{
 		$builder = $this->getContainerBuilder();
 
 		$builder
 			->addDefinition($this->prefixEnvironment('jobs', $name))
-			->setClass(Deployment\Jobs\Jobs::class, [$this->buildJobs($config)])
+			->setClass(Deployment\Jobs\Jobs::class, [$this->buildJobs($name, $config)])
 			->setAutowired(FALSE);
 
 		$builder
@@ -103,13 +103,13 @@ class DeploymentExtension extends DI\CompilerExtension
 			->addTag('kdyby.console.command');
 	}
 
-	private function prefixEnvironment($id, $name)
+	private function prefixEnvironment(string $id, string $name)
 	{
 		$names = array_filter([$id, $name]);
 		return $this->prefix(implode('.', $names));
 	}
 
-	private function buildJobs(array $config)
+	private function buildJobs(string $environment, array $config)
 	{
 		$jobs = [];
 
@@ -119,14 +119,14 @@ class DeploymentExtension extends DI\CompilerExtension
 			}
 
 			foreach ($list as $job) {
-				$jobs[$event][] = $this->expandJob($job, $config);
+				$jobs[$event][] = $this->expandJob($job, $environment, $config);
 			}
 		}
 
 		return $jobs;
 	}
 
-	private function expandJob(string $job, array $config):DI\Statement
+	private function expandJob(string $job, string $environment, array $config):DI\Statement
 	{
 		$job = str_replace('HOST', $config['ftp']['host'], $job);
 		$job = str_replace('USER', $config['ftp']['user'], $job);
@@ -134,6 +134,21 @@ class DeploymentExtension extends DI\CompilerExtension
 
 		if (preg_match('~^https?://.+~', $job)) {
 			return new DI\Statement(Deployment\Jobs\GetRequestJob::class, [$job]);
+		}
+
+		if (preg_match('~^rename (.+?) (.+?)$~', $job, $m)) {
+			return new DI\Statement(Deployment\Jobs\FileRenameJob::class, [
+				'@' . $this->prefixEnvironment('server', $environment),
+				$m[1],
+				$m[2],
+			]);
+		}
+
+		if (preg_match('~^remove (.+?) (.+?)$~', $job, $m)) {
+			return new DI\Statement(Deployment\Jobs\FileRenameJob::class, [
+				'@' . $this->prefixEnvironment('server', $environment),
+				$m[1],
+			]);
 		}
 
 		throw new \RuntimeException('Job was not recognized.');
