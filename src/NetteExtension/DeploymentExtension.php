@@ -36,7 +36,10 @@ class DeploymentExtension extends DI\CompilerExtension
 
 	public function loadConfiguration()
 	{
-		if ($this->config['environments']) {
+		// Ignore invalid environments - we can be on production where file is not available
+		$environments = array_filter($this->config['environments'], 'is_file');
+
+		if ($environments) {
 			foreach ($this->config['environments'] as $name => $path) {
 				$environmentConfig = $this->loadFromFile($path)[$this->name];
 				$config = DI\Config\Helpers::merge($this->getContainerBuilder()->expand($environmentConfig), $this->config);
