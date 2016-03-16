@@ -24,8 +24,8 @@ deployment:
 		onBeforeUpload:
 
 		onBeforeMove:
-			- 'rename app/config/config.production.neon app/config/config.local.neon'
 			- 'https://HOST/?etten-maintainer-job=disable'
 
 		onFinish:
+			- 'rename app/config/config.production.neon app/config/config.local.neon'
 			- 'https://HOST/?etten-maintainer-job=enable'
