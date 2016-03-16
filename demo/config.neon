@@ -4,8 +4,7 @@ extensions:
 deployment:
 	# Environment rewrites global deployment configuration
 	environments:
-		staging: %appDir%/config/config.production.neon
-		production: %appDir%/config/config.staging.neon
+		production: %appDir%/config/config.production.neon
 
 	ftp:
 		host:
