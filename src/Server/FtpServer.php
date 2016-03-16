@@ -25,6 +25,9 @@ class FtpServer implements Server
 	/** @var resource */
 	private $connection;
 
+	/** @var int */
+	private $maxRetries = 10;
+
 	public function __construct(array $config)
 	{
 		$this->config = array_merge($this->config, $config);
@@ -194,6 +197,12 @@ class FtpServer implements Server
 		$this->ftp('pasv', [$this->config['passive']]);
 	}
 
+	private function disconnect()
+	{
+		@ftp_close($this->connection); // @ - Don't fail when cannot close it (can be closed)
+		$this->connection = NULL;
+	}
+
 	/**
 	 * @param string $command
 	 * @param array $args
@@ -259,16 +268,22 @@ class FtpServer implements Server
 		while (!empty($parts)) {
 			$path .= array_shift($parts);
 
-			try {
-				if ($path !== '') {
-					$this->ftp('mkdir', [$path]);
+			$this->runRetry(
+				function () use ($path) {
+					try {
+						if ($path !== '') {
+							$this->ftp('mkdir', [$path]);
+						}
+					} catch (FtpException $e) {
+						// Ignore error when directory already exists
+						if (strpos($e->getMessage(), 'File exists') === FALSE) {
+							throw $e;
+						}
+					}
+				},
+				function () {
 				}
-			} catch (FtpException $e) {
-				// Ignore error when directory already exists
-				if (strpos($e->getMessage(), 'File exists') === FALSE) {
-					throw $e;
-				}
-			}
+			);
 
 			$path .= '/';
 		}
@@ -280,14 +295,39 @@ class FtpServer implements Server
 		$this->writeDirectory(implode('/', array_slice($parts, 0, count($parts) - 1)));
 
 		$blocks = 0;
+
 		do {
-			$ret = $blocks === 0
-				? $this->ftp('nb_put', [$remotePath, $localPath, FTP_BINARY])
-				: $this->ftp('nb_continue');
+			$ret = $this->runRetry(
+				function () use (& $blocks, $remotePath, $localPath) {
+					return $blocks === 0
+						? $this->ftp('nb_put', [$remotePath, $localPath, FTP_BINARY])
+						: $this->ftp('nb_continue');
+				},
+				function () use (& $blocks) {
+					$blocks = 0;
+				}
+			);
 
 			$blocks++;
 
 		} while ($ret === FTP_MOREDATA);
+	}
+
+	private function runRetry(\Closure $run, \Closure $error, $attempt = 1)
+	{
+		try {
+			return $run();
+
+		} catch (FtpException $e) {
+			$this->disconnect();
+
+			if ($attempt < $this->maxRetries) {
+				$error();
+				return $this->runRetry($run, $error, $attempt + 1);
+			}
+
+			throw $e;
+		}
 	}
 
 }
