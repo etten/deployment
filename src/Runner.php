@@ -22,6 +22,9 @@ class Runner
 	/** @var bool */
 	private $testOnly = FALSE;
 
+	/** @var bool */
+	private $forced = FALSE;
+
 	public function __construct(
 		Progress $progress,
 		Jobs\Jobs $jobs,
@@ -42,9 +45,21 @@ class Runner
 		return $this;
 	}
 
+	/**
+	 * @param boolean $forced
+	 * @return $this
+	 */
+	public function setForced(bool $forced)
+	{
+		$this->forced = $forced;
+		return $this;
+	}
+
 	public function run()
 	{
-		$this->deployer->checkPrevious();
+		if (!$this->forced) {
+			$this->deployer->checkPrevious();
+		}
 
 		$this->progress->log(sprintf('Started at %s', date('r')));
 		$this->progress->log('');

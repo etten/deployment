@@ -49,7 +49,8 @@ class DeploymentCommand extends Console\Command\Command
 		$this
 			->setDescription('Deploys the application on remote server given by config.')
 			->addOption('config', 'c', Console\Input\InputOption::VALUE_REQUIRED, 'Path to config file.')
-			->addOption('test', 't', Console\Input\InputOption::VALUE_NONE, 'Does not really upload or delete files, just get list of them.');
+			->addOption('test', 't', Console\Input\InputOption::VALUE_NONE, 'Does not really upload or delete files, just gets list of them.')
+			->addOption('force', 'f', Console\Input\InputOption::VALUE_NONE, 'Force deploy. When another is in progress, continue anyway.');
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
@@ -72,6 +73,7 @@ class DeploymentCommand extends Console\Command\Command
 		);
 
 		$deployment->setTestOnly($input->getOption('test'));
+		$deployment->setForced($input->getOption('force'));
 
 		$deployment->run();
 	}
