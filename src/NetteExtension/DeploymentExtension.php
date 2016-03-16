@@ -54,8 +54,8 @@ class DeploymentExtension extends DI\CompilerExtension
 		$builder = $this->getContainerBuilder();
 
 		// Normalize & expand config
-		$config['jobs'] = array_map(function ($v) {
-			return $this->expandJobs((array)$v, $this->config);
+		$config['jobs'] = array_map(function ($v) use ($config) {
+			return $this->expandJobs((array)$v, $config);
 		}, $config['jobs']);
 
 		$builder
