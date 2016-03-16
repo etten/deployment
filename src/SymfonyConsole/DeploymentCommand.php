@@ -19,6 +19,11 @@ class DeploymentCommand extends Console\Command\Command
 	/** @var Deployment\Deployer */
 	private $deployer;
 
+	public function __construct($name = 'deployment')
+	{
+		parent::__construct($name);
+	}
+
 	/**
 	 * @param Deployment\Jobs\Jobs $jobs
 	 * @return $this
@@ -42,7 +47,6 @@ class DeploymentCommand extends Console\Command\Command
 	protected function configure()
 	{
 		$this
-			->setName('deployment')
 			->setDescription('Deploys the application on remote server given by config.')
 			->addOption('config', 'c', Console\Input\InputOption::VALUE_REQUIRED, 'Path to config file.')
 			->addOption('test', 't', Console\Input\InputOption::VALUE_NONE, 'Does not really upload or delete files, just get list of them.');

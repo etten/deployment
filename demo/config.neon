@@ -1,0 +1,31 @@
+extensions:
+	deployment: Etten\Deployment\NetteExtension\DeploymentExtension
+
+deployment:
+	# Environment rewrites global deployment configuration
+	environments:
+		staging: %appDir%/config/config.production.neon
+		production: %appDir%/config/config.staging.neon
+
+	ftp:
+		host:
+		user:
+		password:
+		secured: yes
+
+	paths:
+		local: %appDir%/..
+		remote: /
+		ignore:
+			- /.idea
+
+	jobs:
+		onStart:
+
+		onBeforeUpload:
+
+		onBeforeMove:
+			- 'https://HOST/?etten-maintainer-job=disable'
+
+		onFinish:
+			- 'https://HOST/?etten-maintainer-job=enable'

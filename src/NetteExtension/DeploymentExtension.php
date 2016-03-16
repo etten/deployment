@@ -14,6 +14,7 @@ class DeploymentExtension extends DI\CompilerExtension
 {
 
 	protected $config = [
+		'environments' => [],
 		'ftp' => [
 			'host' => NULL,
 			'user' => NULL,
@@ -35,59 +36,86 @@ class DeploymentExtension extends DI\CompilerExtension
 
 	public function loadConfiguration()
 	{
-		// Normalize config
-		$this->config['jobs'] = array_map(function ($v) {
-			return (array)$v;
-		}, $this->config['jobs']);
-
 		$builder = $this->getContainerBuilder();
 
-		$builder
-			->addDefinition($this->prefix('jobs'))
-			->setClass(Deployment\Jobs\Jobs::class, [$this->config['jobs']])
-			->setAutowired(FALSE);
+		if (!$this->config['environments']) {
+			throw new \RuntimeException('No Environment is configured.');
+		}
 
-		$builder
-			->addDefinition($this->prefix('server'))
-			->setClass(Deployment\Server\FtpServer::class, [$this->config['ftp']])
-			->setAutowired(FALSE);
+		foreach ($this->config['environments'] as $name => $path) {
+			$environmentConfig = $this->loadFromFile($path)[$this->name];
+			$config = DI\Config\Helpers::merge($this->getContainerBuilder()->expand($environmentConfig), $this->config);
 
-		$builder
-			->addDefinition($this->prefix('collector'))
-			->setClass(Deployment\FileCollector::class, [
-				[
-					'path' => $this->config['paths']['local'],
-					'ignore' => $this->config['paths']['ignore'],
-				],
-			])
-			->setAutowired(FALSE);
+			// Normalize & expand config
+			$config['jobs'] = array_map(function ($v) {
+				return $this->expandJobs((array)$v, $this->config);
+			}, $config['jobs']);
 
-		$builder
-			->addDefinition($this->prefix('fileList'))
-			->setClass(Deployment\FileList::class)
-			->setAutowired(FALSE);
+			$builder
+				->addDefinition($this->prefixEnvironment($name, 'jobs'))
+				->setClass(Deployment\Jobs\Jobs::class, [$config['jobs']])
+				->setAutowired(FALSE);
 
-		$builder
-			->addDefinition($this->prefix('deployer'))
-			->setClass(Deployment\Deployer::class, [
-				[
-					'path' => $this->config['paths']['remote'],
-					'temp' => '/.deploy/',
-					'deployedFile' => '/.deployed',
-					'deletedFile' => '/.deleted',
-				],
-				'@' . $this->prefix('server'),
-				'@' . $this->prefix('collector'),
-				'@' . $this->prefix('fileList'),
-			])
-			->setAutowired(FALSE);
+			$builder
+				->addDefinition($this->prefixEnvironment($name, 'server'))
+				->setClass(Deployment\Server\FtpServer::class, [$config['ftp']])
+				->setAutowired(FALSE);
 
-		$builder
-			->addDefinition($this->prefix('deployment'))
-			->setClass(Deployment\SymfonyConsole\DeploymentCommand::class)
-			->addSetup('setJobs', ['@' . $this->prefix('jobs')])
-			->addSetup('setDeployer', ['@' . $this->prefix('deployer')])
-			->addTag('kdyby.console.command');
+			$builder
+				->addDefinition($this->prefixEnvironment($name, 'collector'))
+				->setClass(Deployment\FileCollector::class, [
+					[
+						'path' => $config['paths']['local'],
+						'ignore' => $config['paths']['ignore'],
+					],
+				])
+				->setAutowired(FALSE);
+
+			$builder
+				->addDefinition($this->prefixEnvironment($name, 'fileList'))
+				->setClass(Deployment\FileList::class)
+				->setAutowired(FALSE);
+
+			$builder
+				->addDefinition($this->prefixEnvironment($name, 'deployer'))
+				->setClass(Deployment\Deployer::class, [
+					[
+						'path' => $config['paths']['remote'],
+						'temp' => '/.deploy/',
+						'deployedFile' => '/.deployed',
+						'deletedFile' => '/.deleted',
+					],
+					'@' . $this->prefixEnvironment($name, 'server'),
+					'@' . $this->prefixEnvironment($name, 'collector'),
+					'@' . $this->prefixEnvironment($name, 'fileList'),
+				])
+				->setAutowired(FALSE);
+
+			$builder
+				->addDefinition($this->prefixEnvironment($name, 'deployment'))
+				->setClass(Deployment\SymfonyConsole\DeploymentCommand::class, [
+					'deployment:' . $name,
+				])
+				->addSetup('setJobs', ['@' . $this->prefixEnvironment($name, 'jobs')])
+				->addSetup('setDeployer', ['@' . $this->prefixEnvironment($name, 'deployer')])
+				->addTag('kdyby.console.command');
+		}
+	}
+
+	private function prefixEnvironment($env, $id)
+	{
+		return $this->prefix($id . '.' . $env);
+	}
+
+	private function expandJobs(array $jobs, array $config)
+	{
+		return array_map(function ($job) use ($config) {
+			$job = str_replace('HOST', $config['ftp']['host'], $job);
+			$job = str_replace('USER', $config['ftp']['user'], $job);
+			$job = str_replace('PASSWORD', $config['ftp']['password'], $job);
+
+			return $job;
+		}, $jobs);
 	}
 
 }

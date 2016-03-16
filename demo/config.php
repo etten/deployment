@@ -2,9 +2,9 @@
 
 namespace Etten\Deployment;
 
-$host = 'hranicka.cz';
-$user = 'demo.hranicka.cz';
-$password = 'demo1.';
+$host = '';
+$user = '';
+$password = '';
 
 return [
 	'deployer' => new Deployer(
@@ -30,10 +30,10 @@ return [
 		'onStart' => [],
 		'onBeforeUpload' => [],
 		'onBeforeMove' => [
-			"https://$host/service/deploy?job=beforeMove",
+			"https://$host/?etten-maintainer-job=disable",
 		],
 		'onFinish' => [
-			"https://$host/service/deploy?job=finish",
+			"https://$host/?etten-maintainer-job=enable",
 		],
 	]),
 ];
