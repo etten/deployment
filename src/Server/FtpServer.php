@@ -143,21 +143,13 @@ class FtpServer implements Server
 		$list = $this->ftp('nlist', [$path]);
 
 		foreach ($list as $item) {
-			// Skip current and previous directory mark
-			if (in_array($item, ['.', '..'])) {
-				continue;
-			}
-
-			// Build full file path
-			$itemPath = rtrim($path, '/') . '/' . $item;
-
 			// If is a directory, add directory separator to the end
-			if ($this->isDirectoryExists($itemPath)) {
-				$itemPath .= '/';
+			if ($this->isDirectoryExists($item)) {
+				$item .= '/';
 			}
 
 			// Remove current item
-			$this->remove($itemPath);
+			$this->remove($item);
 		}
 
 		// Directory should be empty now, delete it
