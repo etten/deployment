@@ -26,7 +26,7 @@ class FtpServer implements Server
 	private $connection;
 
 	/** @var int */
-	private $maxRetries = 10;
+	private $maxRetries = 5;
 
 	public function __construct(array $config)
 	{
@@ -199,7 +199,7 @@ class FtpServer implements Server
 
 	private function disconnect()
 	{
-		@ftp_close($this->connection); // @ - Don't fail when cannot close it (can be closed)
+		ftp_close($this->connection);
 		$this->connection = NULL;
 	}
 
@@ -235,16 +235,25 @@ class FtpServer implements Server
 
 	private function isDirectoryExists(string $path):bool
 	{
-		$exists = TRUE;
 		$currentDir = $this->ftp('pwd');
 
-		try {
-			$this->ftp('chdir', [$path]);
-		} catch (FtpException $e) {
+		$exists = $this->runRetry(function () use ($path, $currentDir) {
 			$exists = FALSE;
-		}
 
-		$this->ftp('chdir', [$currentDir ?: '/']);
+			try {
+				$exists = $this->ftp('chdir', [$path]);
+			} catch (FtpException $e) {
+				// Ignore error when directory is not exists
+				if (strpos($e->getMessage(), 'No such file or directory') === FALSE) {
+					throw $e;
+				}
+			}
+
+			$this->ftp('chdir', [$currentDir ?: '/']);
+
+			return $exists;
+		});
+
 		return $exists;
 	}
 
@@ -262,28 +271,28 @@ class FtpServer implements Server
 
 	private function writeDirectory(string $remotePath)
 	{
+		if ($this->isDirectoryExists($remotePath)) {
+			return;
+		}
+
 		$parts = explode('/', $remotePath);
 
 		$path = '';
 		while (!empty($parts)) {
 			$path .= array_shift($parts);
 
-			$this->runRetry(
-				function () use ($path) {
+			if ($path) {
+				$this->runRetry(function () use ($path) {
 					try {
-						if ($path !== '') {
-							$this->ftp('mkdir', [$path]);
-						}
+						$this->ftp('mkdir', [$path]);
 					} catch (FtpException $e) {
 						// Ignore error when directory already exists
 						if (strpos($e->getMessage(), 'File exists') === FALSE) {
 							throw $e;
 						}
 					}
-				},
-				function () {
-				}
-			);
+				});
+			}
 
 			$path .= '/';
 		}
@@ -294,39 +303,28 @@ class FtpServer implements Server
 		$parts = explode('/', $remotePath);
 		$this->writeDirectory(implode('/', array_slice($parts, 0, count($parts) - 1)));
 
-		$blocks = 0;
-
-		do {
-			$ret = $this->runRetry(
-				function () use (& $blocks, $remotePath, $localPath) {
-					return $blocks === 0
-						? $this->ftp('nb_put', [$remotePath, $localPath, FTP_BINARY])
-						: $this->ftp('nb_continue');
-				},
-				function () use (& $blocks) {
-					$blocks = 0;
-				}
-			);
-
-			$blocks++;
-
-		} while ($ret === FTP_MOREDATA);
+		$this->runRetry(
+			function () use ($remotePath, $localPath) {
+				$this->ftp('put', [$remotePath, $localPath, FTP_BINARY]);
+			}
+		);
 	}
 
-	private function runRetry(\Closure $run, \Closure $error, $attempt = 1)
+	private function runRetry(\Closure $run, $attempt = 1)
 	{
 		try {
 			return $run();
 
 		} catch (FtpException $e) {
-			$this->disconnect();
-
-			if ($attempt < $this->maxRetries) {
-				$error();
-				return $this->runRetry($run, $error, $attempt + 1);
+			if ($attempt >= $this->maxRetries) {
+				throw $e;
 			}
 
-			throw $e;
+			$this->disconnect();
+			$this->connect();
+
+			return $this->runRetry($run, $attempt + 1);
+
 		}
 	}
 
