@@ -53,14 +53,9 @@ class DeploymentExtension extends DI\CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 
-		// Normalize & expand config
-		$config['jobs'] = array_map(function ($v) use ($config) {
-			return $this->expandJobs((array)$v, $config);
-		}, $config['jobs']);
-
 		$builder
 			->addDefinition($this->prefixEnvironment('jobs', $name))
-			->setClass(Deployment\Jobs\Jobs::class, [$config['jobs']])
+			->setClass(Deployment\Jobs\Jobs::class, [$this->buildJobs($config)])
 			->setAutowired(FALSE);
 
 		$builder
@@ -114,15 +109,34 @@ class DeploymentExtension extends DI\CompilerExtension
 		return $this->prefix(implode('.', $names));
 	}
 
-	private function expandJobs(array $jobs, array $config)
+	private function buildJobs(array $config)
 	{
-		return array_map(function ($job) use ($config) {
-			$job = str_replace('HOST', $config['ftp']['host'], $job);
-			$job = str_replace('USER', $config['ftp']['user'], $job);
-			$job = str_replace('PASSWORD', $config['ftp']['password'], $job);
+		$jobs = [];
 
-			return $job;
-		}, $jobs);
+		foreach ($config['jobs'] as $event => $list) {
+			if (!is_array($list)) {
+				continue;
+			}
+
+			foreach ($list as $job) {
+				$jobs[$event][] = $this->expandJob($job, $config);
+			}
+		}
+
+		return $jobs;
+	}
+
+	private function expandJob(string $job, array $config):DI\Statement
+	{
+		$job = str_replace('HOST', $config['ftp']['host'], $job);
+		$job = str_replace('USER', $config['ftp']['user'], $job);
+		$job = str_replace('PASSWORD', $config['ftp']['password'], $job);
+
+		if (preg_match('~^https?://.+~', $job)) {
+			return new DI\Statement(Deployment\Jobs\GetRequestJob::class, [$job]);
+		}
+
+		throw new \RuntimeException('Job was not recognized.');
 	}
 
 }
