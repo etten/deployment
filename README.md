@@ -21,7 +21,7 @@ $ composer require etten/deployment
 
 Use it via DI Extension. See [demo](demo/nette.neon).
 
-It doesn't require comments.
+It doesn't require comments. You can find directives in the config.
 
 After install, run it via CLI:
 
