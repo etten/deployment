@@ -14,16 +14,16 @@ class Jobs
 {
 
 	/** @var Job[] */
-	public $onStart = [];
+	private $onStart = [];
 
 	/** @var Job[] */
-	public $onBeforeUpload = [];
+	private $onBeforeUpload = [];
 
 	/** @var Job[] */
-	public $onBeforeMove = [];
+	private $onBeforeMove = [];
 
 	/** @var Job[] */
-	public $onFinish = [];
+	private $onFinish = [];
 
 	/** @var Progress */
 	private $progress;
