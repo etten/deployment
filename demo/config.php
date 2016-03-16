@@ -2,6 +2,8 @@
 
 namespace Etten\Deployment;
 
+use Etten\Deployment\Jobs\GetRequestJob;
+
 $host = '';
 $user = '';
 $password = '';
@@ -30,10 +32,10 @@ return [
 		'onStart' => [],
 		'onBeforeUpload' => [],
 		'onBeforeMove' => [
-			"https://$host/?etten-maintainer-job=disable",
+			new GetRequestJob("https://$host/?etten-maintainer-job=disable"),
 		],
 		'onFinish' => [
-			"https://$host/?etten-maintainer-job=enable",
+			new GetRequestJob("https://$host/?etten-maintainer-job=enable"),
 		],
 	]),
 ];

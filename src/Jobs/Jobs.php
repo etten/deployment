@@ -84,10 +84,10 @@ class Jobs
 	}
 
 	/**
-	 * @param Job|mixed $job
+	 * @param Job $job
 	 * @throws JobException
 	 */
-	private function runJob($job)
+	private function runJob(Job $job)
 	{
 		// Kdyby\Events support
 		if ($job instanceof \Closure) {
@@ -99,10 +99,6 @@ class Jobs
 		}
 
 		// Convert to a Job instance.
-		if (!$job instanceof Job) {
-			$job = $this->createJob($job);
-		}
-
 		$this->progress->log(sprintf('Running job: %s', $job->getName()));
 
 		try {
@@ -110,15 +106,6 @@ class Jobs
 		} catch (\Throwable $e) {
 			throw new JobException($e->getMessage(), NULL, $e);
 		}
-	}
-
-	private function createJob($input):Job
-	{
-		if (preg_match('~^https?://.+~', $input)) {
-			return new GetRequestJob($input);
-		}
-
-		throw new JobException('Cannot create a Job instance.');
 	}
 
 }
