@@ -18,7 +18,7 @@ return [
 			'host' => $host,
 			'user' => $user,
 			'password' => $password,
-			'secured' => TRUE,
+			'secured' => TRUE, // When TRUE, sometimes fails with: "Unable to build data connection: Operation not permitted" (Windows)
 		]),
 		new FileCollector([
 			'path' => __DIR__ . '/../',

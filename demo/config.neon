@@ -11,7 +11,7 @@ deployment:
 		host:
 		user:
 		password:
-		secured: yes
+		secured: yes # When TRUE, sometimes fails with: "Unable to build data connection: Operation not permitted" (Windows)
 
 	paths:
 		local: %appDir%/..
