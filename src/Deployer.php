@@ -142,6 +142,17 @@ class Deployer
 
 	public function clean()
 	{
+		// Clean .deploy/.deployed file if has not been removed.
+		$this->server->remove(
+			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile'])
+		);
+
+		// Clean .deploy/.deleted file if has not been removed.
+		$this->server->remove(
+			$this->mergePaths($this->getRemoteTempPath(), $this->config['deletedFile'])
+		);
+
+		// Try clean whole .deploy directory
 		$this->server->remove($this->getRemoteTempPath());
 	}
 
