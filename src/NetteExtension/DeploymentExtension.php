@@ -153,8 +153,8 @@ class DeploymentExtension extends DI\CompilerExtension
 			]);
 		}
 
-		if (preg_match('~^remove (.+?) (.+?)$~', $job, $m)) {
-			return new DI\Statement(Deployment\Jobs\FileRenameJob::class, [
+		if (preg_match('~^remove (.+?)$~', $job, $m)) {
+			return new DI\Statement(Deployment\Jobs\FileRemoveJob::class, [
 				'@' . $this->prefixEnvironment('server', $environment),
 				$m[1],
 			]);
