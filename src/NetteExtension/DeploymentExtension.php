@@ -41,7 +41,13 @@ class DeploymentExtension extends DI\CompilerExtension
 
 		if ($environments) {
 			foreach ($this->config['environments'] as $name => $path) {
-				$environmentConfig = $this->loadFromFile($path)[$this->name];
+				// If extra config file not exists, skip it.
+				if (!is_file($path)) {
+					continue;
+				}
+
+				// Additional config section may not exist.
+				$environmentConfig = $this->loadFromFile($path)[$this->name] ?? [];
 				$config = DI\Config\Helpers::merge($this->getContainerBuilder()->expand($environmentConfig), $this->config);
 
 				$this->addEnvironment($name, $config);
