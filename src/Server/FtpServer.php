@@ -241,12 +241,17 @@ class FtpServer implements Server
 			try {
 				return $this->ftp('chdir', [$path]);
 			} catch (FtpException $e) {
-				// Ignore error when directory is not exists
-				if (strpos($e->getMessage(), 'No such file or directory') === FALSE) {
-					throw $e;
+				// Given path is not a directory...
+				if (strpos($e->getMessage(), 'Not a directory') !== FALSE) {
+					return FALSE;
 				}
 
-				return FALSE;
+				// Directory is not exists...
+				if (strpos($e->getMessage(), 'No such file or directory') !== FALSE) {
+					return FALSE;
+				}
+
+				throw $e;
 			}
 		});
 
