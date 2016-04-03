@@ -65,7 +65,7 @@ class FtpServer implements Server
 				$this->renameFile($originalPath, $newPath);
 			}
 		} catch (FtpException $e) {
-			if ($this->ftp('nlist', [$originalPath])) {
+			if ($this->listDirectory($originalPath)) {
 				throw $e;
 			}
 		}
@@ -80,10 +80,18 @@ class FtpServer implements Server
 				$this->removeFile($remotePath);
 			}
 		} catch (FtpException $e) {
-			if ($this->ftp('nlist', [$remotePath])) {
+			if ($this->listDirectory($remotePath)) {
 				throw $e;
 			}
 		}
+	}
+
+	private function listDirectory(string $path):array
+	{
+		$list = $this->ftp('nlist', [$path]);
+		return array_filter($list, function (string $s) {
+			return $s !== '.' && $s !== '..';
+		});
 	}
 
 	private function renameFile(string $originalPath, string $newPath)
@@ -107,7 +115,7 @@ class FtpServer implements Server
 		$this->writeDirectory($newPath);
 
 		// Walk directory contents
-		$list = $this->ftp('nlist', [$originalPath]);
+		$list = $this->listDirectory($originalPath);
 
 		foreach ($list as $item) {
 			// Skip current and previous directory mark
@@ -140,7 +148,7 @@ class FtpServer implements Server
 
 	private function removeDirectory(string $path)
 	{
-		$list = $this->ftp('nlist', [$path]);
+		$list = $this->listDirectory($path);
 
 		foreach ($list as $item) {
 			// If is a directory, add directory separator to the end
