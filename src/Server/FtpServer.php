@@ -89,9 +89,22 @@ class FtpServer implements Server
 	private function listDirectory(string $path):array
 	{
 		$list = $this->ftp('nlist', [$path]);
-		return array_filter($list, function (string $s) {
+
+		// ftp_nlist may return false.
+		if (!$list) {
+			return [];
+		}
+
+		$filtered = array_filter($list, function (string $s) {
 			return $s !== '.' && $s !== '..';
 		});
+
+		$mapped = array_map(function (string $s) {
+			// Make path relative when is not (target server dependent?)
+			return substr($s, strrpos($s, '/') + 1);
+		}, $filtered);
+
+		return $mapped;
 	}
 
 	private function renameFile(string $originalPath, string $newPath)
@@ -118,11 +131,6 @@ class FtpServer implements Server
 		$list = $this->listDirectory($originalPath);
 
 		foreach ($list as $item) {
-			// Skip current and previous directory mark
-			if (in_array($item, ['.', '..'])) {
-				continue;
-			}
-
 			// Build full file path
 			$originalItemPath = rtrim($originalPath, '/') . '/' . $item;
 			$newItemPath = rtrim($newPath, '/') . '/' . $item;
@@ -151,6 +159,9 @@ class FtpServer implements Server
 		$list = $this->listDirectory($path);
 
 		foreach ($list as $item) {
+			// Build full file path
+			$item = rtrim($path, '/') . '/' . $item;
+
 			// If is a directory, add directory separator to the end
 			if ($this->isDirectoryExists($item)) {
 				$item .= '/';
