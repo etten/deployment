@@ -101,7 +101,12 @@ class FtpServer implements Server
 
 		$mapped = array_map(function (string $s) {
 			// Make path relative when is not (target server dependent?)
-			return substr($s, strrpos($s, '/') + 1);
+			$lastSlashPosition = strrpos($s, '/');
+			if ($lastSlashPosition !== FALSE) {
+				$s = substr($s, $lastSlashPosition + 1);
+			}
+
+			return $s;
 		}, $filtered);
 
 		return $mapped;
