@@ -1,6 +1,7 @@
 extensions:
 	deployment: Etten\Deployment\NetteExtension\DeploymentExtension
 
+
 deployment:
 	# Environment rewrites global deployment configuration
 	environments:
