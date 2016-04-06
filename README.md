@@ -19,7 +19,7 @@ $ composer require etten/deployment
 
 ### [Nette](https://nette.org) application
 
-Use it via DI Extension. See [demo](demo/nette.neon).
+Use it via DI Extension. See [demo](demo/config.neon).
 
 It doesn't require comments. You can find directives in the config.
 
