@@ -204,6 +204,10 @@ class FtpServer implements Server
 			throw new FtpException('PHP extension FTP is not loaded.');
 		}
 
+		if (!$this->config['host']) {
+			throw new FtpException('HOST is not set.');
+		}
+
 		$this->connection = $this->protect(
 			$this->config['secured'] ? 'ftp_ssl_connect' : 'ftp_connect',
 			[$this->config['host'], $this->config['port']]
