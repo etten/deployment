@@ -69,7 +69,10 @@ class DeploymentExtension extends DI\CompilerExtension
 
 		$builder
 			->addDefinition($this->prefixEnvironment('server', $name))
-			->setClass(Deployment\Server\FtpServer::class, [$config['ftp']])
+			->setClass(
+				Deployment\Server\FtpServer::class,
+				[['path' => $config['paths']['remote']] + $config['ftp']]
+			)
 			->setAutowired(FALSE);
 
 		$builder
@@ -91,7 +94,6 @@ class DeploymentExtension extends DI\CompilerExtension
 			->addDefinition($this->prefixEnvironment('deployer', $name))
 			->setClass(Deployment\Deployer::class, [
 				[
-					'path' => $config['paths']['remote'],
 					'temp' => '/.deploy/',
 					'deployedFile' => '/.deployed',
 					'deletedFile' => '/.deleted',

@@ -13,6 +13,7 @@ $server = new Server\FtpServer([
 	'user' => $user,
 	'password' => $password,
 	'secured' => TRUE, // When TRUE, sometimes fails with: "Unable to build data connection: Operation not permitted" (Windows)
+	'path' => '/',
 ]);
 
 $collector = new FileCollector([
@@ -22,7 +23,6 @@ $collector = new FileCollector([
 
 $deployer = new Deployer(
 	[
-		'path' => '/',
 		'temp' => '/.deploy/',
 		'deployedFile' => '/.deployed',
 		'deletedFile' => '/.deleted',

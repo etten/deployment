@@ -12,7 +12,6 @@ class Deployer
 
 	/** @var string[] */
 	private $config = [
-		'path' => '/',
 		'temp' => '/.deploy/',
 		'deployedFile' => '/.deployed',
 		'deletedFile' => '/.deleted',
@@ -56,7 +55,7 @@ class Deployer
 
 	public function checkPrevious()
 	{
-		if ($this->server->exists($this->getRemoteTempPath())) {
+		if ($this->server->exists($this->config['temp'])) {
 			throw new Exception('Another deployment is in progress or has failed.');
 		}
 	}
@@ -68,16 +67,14 @@ class Deployer
 
 	public function findDeployedFiles():array
 	{
-		$remotePath = $this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile']);
-
-		if ($this->server->exists($remotePath)) {
+		if ($this->server->exists($this->config['deployedFile'])) {
 			$tempFilePath = TempFile::create();
-			$this->server->read($remotePath, $tempFilePath);
+			$this->server->read($this->config['deployedFile'], $tempFilePath);
 			return $this->fileList->read($tempFilePath);
 		}
 
 		// dg/ftp-deployment compatibility
-		$ftpDeployment = new FtpDeploymentReader($this->getRemoteBasePath(), $this->server);
+		$ftpDeployment = new FtpDeploymentReader($this->server);
 		return $ftpDeployment->findDeployedFiles();
 	}
 
@@ -105,7 +102,7 @@ class Deployer
 		foreach ($files as $file => $hash) {
 			$this->progress->log(sprintf('Uploading [%d/%d] %s', ++$progress, $count, $file));
 			$this->server->write(
-				$this->mergePaths($this->getRemoteTempPath(), $file),
+				$this->getTempPath($file),
 				$this->mergePaths($this->collector->basePath(), $file)
 			);
 		}
@@ -122,8 +119,8 @@ class Deployer
 			$this->progress->log(sprintf('Moving [%d/%d] %s', ++$progress, $count, $file));
 
 			$this->server->rename(
-				$this->mergePaths($this->getRemoteTempPath(), $file),
-				$this->mergePaths($this->getRemoteBasePath(), $file)
+				$this->getTempPath($file),
+				$file
 			);
 		}
 	}
@@ -135,10 +132,7 @@ class Deployer
 
 		foreach ($files as $file => $hash) {
 			$this->progress->log(sprintf('Deleting [%d/%d] %s', ++$progress, $count, $file));
-
-			$this->server->remove(
-				$this->mergePaths($this->getRemoteBasePath(), $file)
-			);
+			$this->server->remove($file);
 		}
 	}
 
@@ -146,16 +140,16 @@ class Deployer
 	{
 		// Clean .deploy/.deployed file if has not been removed.
 		$this->server->remove(
-			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile'])
+			$this->getTempPath($this->config['deployedFile'])
 		);
 
 		// Clean .deploy/.deleted file if has not been removed.
 		$this->server->remove(
-			$this->mergePaths($this->getRemoteTempPath(), $this->config['deletedFile'])
+			$this->getTempPath($this->config['deletedFile'])
 		);
 
 		// Try clean whole .deploy directory
-		$this->server->remove($this->getRemoteTempPath());
+		$this->server->remove($this->config['temp']);
 	}
 
 	public function writeDeployedList(array $files)
@@ -166,8 +160,8 @@ class Deployer
 	public function moveDeployedList()
 	{
 		$this->server->rename(
-			$this->mergePaths($this->getRemoteTempPath(), $this->config['deployedFile']),
-			$this->mergePaths($this->getRemoteBasePath(), $this->config['deployedFile'])
+			$this->getTempPath($this->config['deployedFile']),
+			$this->config['deployedFile']
 		);
 	}
 
@@ -182,19 +176,14 @@ class Deployer
 		$this->fileList->write($tempFilePath, $files);
 
 		$this->server->write(
-			$this->mergePaths($this->getRemoteTempPath(), $file),
+			$this->getTempPath($file),
 			$tempFilePath
 		);
 	}
 
-	private function getRemoteBasePath()
+	private function getTempPath(string $path):string
 	{
-		return $this->config['path'];
-	}
-
-	private function getRemoteTempPath()
-	{
-		return $this->mergePaths($this->getRemoteBasePath(), $this->config['temp']);
+		return $this->mergePaths($this->config['temp'], $path);
 	}
 
 	private function mergePaths(string $path1, string $path2)

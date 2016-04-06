@@ -12,25 +12,19 @@ use Etten\Deployment\Server\Server;
 class FtpDeploymentReader
 {
 
-	/** @var string */
-	private $remoteBasePath;
-
 	/** @var Server */
 	private $server;
 
-	public function __construct(string $remoteBasePath, Server $server)
+	public function __construct(Server $server)
 	{
-		$this->remoteBasePath = $remoteBasePath;
 		$this->server = $server;
 	}
 
 	public function findDeployedFiles():array
 	{
-		$remotePath = $this->mergePaths($this->remoteBasePath, '/.htdeployment');
-
-		if ($this->server->exists($remotePath)) {
+		if ($this->server->exists('/.htdeployment')) {
 			$tempFilePath = TempFile::create();
-			$this->server->read($remotePath, $tempFilePath);
+			$this->server->read('/.htdeployment', $tempFilePath);
 			return $this->read($tempFilePath);
 		}
 
@@ -49,11 +43,6 @@ class FtpDeploymentReader
 		}
 
 		return $res;
-	}
-
-	private function mergePaths($path1, $path2)
-	{
-		return rtrim($path1, '/') . $path2;
 	}
 
 }
