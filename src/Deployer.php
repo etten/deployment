@@ -92,7 +92,7 @@ class Deployer
 		}, ARRAY_FILTER_USE_BOTH);
 	}
 
-	public function filterFilesToDelete(array $local, $deployed):array
+	public function filterFilesToDelete(array $local, array $deployed):array
 	{
 		return array_diff_key($deployed, $local);
 	}
@@ -197,7 +197,7 @@ class Deployer
 		return $this->mergePaths($this->getRemoteBasePath(), $this->config['temp']);
 	}
 
-	private function mergePaths($path1, $path2)
+	private function mergePaths(string $path1, string $path2)
 	{
 		return rtrim($path1, '/') . $path2;
 	}
