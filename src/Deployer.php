@@ -76,7 +76,9 @@ class Deployer
 			return $this->fileList->read($tempFilePath);
 		}
 
-		return [];
+		// dg/ftp-deployment compatibility
+		$ftpDeployment = new FtpDeploymentReader($this->getRemoteBasePath(), $this->server);
+		return $ftpDeployment->findDeployedFiles();
 	}
 
 	public function filterFilesToDeploy(array $local, array $deployed):array

@@ -6,7 +6,18 @@ Inspired by [dg/ftp-deployment](https://github.com/dg/ftp-deployment).
 
 **Do not deploy application manually!**
 
-Deploy it automatically, with custom jobs. Upload only modified files.
+Deploy it automatically with this tool, run jobs before/after deploy. Upload only modified files.
+
+
+## Other tool compatibility
+
+This packages can easily replace [dg/ftp-deployment](https://github.com/dg/ftp-deployment).
+
+If you have deployed applications with that tool, simply start using **etten/deployment**.
+
+It can read dg/ftp-deployment deployed files database and simply continue only with modified files.
+
+*This is tested with dg/ftp-deployment v2.5.*
 
 
 ## Usage
@@ -16,6 +27,7 @@ Just install via Composer to your project:
 ```bash
 $ composer require etten/deployment
 ```
+
 
 ### [Nette](https://nette.org) application
 
