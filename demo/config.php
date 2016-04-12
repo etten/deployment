@@ -39,7 +39,7 @@ $jobs = new Jobs\Jobs([
 		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=disable"),
 	],
 	'onFinish' => [
-		new Jobs\FileRenameJob($server, 'app/config/config.production.neon', 'app/config/config.local.neon'),
+		new Jobs\FileRenameJob($server, '/app/config/config.production.neon', '/app/config/config.local.neon'),
 		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=enable"),
 	],
 ]);
