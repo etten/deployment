@@ -58,6 +58,19 @@ class SshServerCore implements Server
 		$this->exec('rm -rf ' . $this->escape($remotePath));
 	}
 
+	/**
+	 * Executes command on remote server.
+	 * @param string $command
+	 * @return string
+	 */
+	public function exec(string $command):string
+	{
+		$stream = $this->ssh('exec', [$command]);
+		stream_set_blocking($stream, TRUE);
+		$streamOut = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+		return stream_get_contents($streamOut);
+	}
+
 	private function isDirectory(string $path):bool
 	{
 		return substr($path, -1) === '/';
@@ -102,14 +115,6 @@ class SshServerCore implements Server
 
 		array_unshift($args, $this->sftp);
 		return $this->protect('ssh2_sftp_' . $command, $args);
-	}
-
-	private function exec(string $command):string
-	{
-		$stream = $this->ssh('exec', [$command]);
-		stream_set_blocking($stream, TRUE);
-		$streamOut = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-		return stream_get_contents($streamOut);
 	}
 
 	private function escape(string $command):string

@@ -46,6 +46,8 @@ $jobs = new Jobs\Jobs([
 	'onBeforeUpload' => [],
 	'onBeforeMove' => [
 		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=disable"),
+//		// Alternatively, you can call SSH commands.
+//		new Jobs\SshJob($server, '/bin/php web/index.php deploy:disableApp'),
 	],
 	'onFinish' => [
 		new Jobs\FileRenameJob($server, '/app/config/config.production.neon', '/app/config/config.local.neon'),

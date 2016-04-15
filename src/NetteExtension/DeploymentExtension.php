@@ -183,6 +183,13 @@ class DeploymentExtension extends DI\CompilerExtension
 			]);
 		}
 
+		if (preg_match('~^ssh (.+?)$~', $job, $m)) {
+			return new DI\Statement(Deployment\Jobs\SshJob::class, [
+				'@' . $this->prefixEnvironment('server', $environment),
+				$m[1],
+			]);
+		}
+
 		throw new \RuntimeException('Job was not recognized.');
 	}
 

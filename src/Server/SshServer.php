@@ -19,9 +19,22 @@ class SshServer extends ServerProxy
 		'path' => '/',
 	];
 
+	/** @var SshServer */
+	protected $server;
+
 	protected function createServer():Server
 	{
 		return new SshServerCore($this->config);
+	}
+
+	/**
+	 * Executes command on remote server.
+	 * @param string $command
+	 * @return string
+	 */
+	public function exec(string $command)
+	{
+		return $this->server->exec($command);
 	}
 
 }
