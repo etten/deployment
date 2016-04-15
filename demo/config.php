@@ -8,11 +8,19 @@ $host = '';
 $user = '';
 $password = '';
 
-$server = new Server\FtpServer([
+// If you need old FTP instead of SSH: Uncomment this and comment SSH.
+//$server = new Server\FtpServer([
+//	'host' => $host,
+//	'user' => $user,
+//	'password' => $password,
+//	'secured' => TRUE, // When TRUE, sometimes fails with: "Unable to build data connection: Operation not permitted" (Windows)
+//	'path' => '/',
+//]);
+
+$server = new Server\SshServerCore([
 	'host' => $host,
 	'user' => $user,
 	'password' => $password,
-	'secured' => TRUE, // When TRUE, sometimes fails with: "Unable to build data connection: Operation not permitted" (Windows)
 	'path' => '/',
 ]);
 
