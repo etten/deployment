@@ -7,7 +7,7 @@
 
 namespace Etten\Deployment\Server;
 
-class SshServer implements Server
+class SshServer extends ServerProxy
 {
 
 	/** @var array */
@@ -19,56 +19,9 @@ class SshServer implements Server
 		'path' => '/',
 	];
 
-	/** @var Server */
-	private $server;
-
-	public function __construct(array $config)
+	protected function createServer():Server
 	{
-		$this->config = array_merge($this->config, $config);
-		$this->server = new SshServer($this->config);
-	}
-
-	public function exists(string $remotePath):bool
-	{
-		return $this->server->exists(
-			$this->getRemotePath($remotePath)
-		);
-	}
-
-	public function read(string $remotePath, string $localPath)
-	{
-		$this->server->read(
-			$this->getRemotePath($remotePath),
-			$localPath
-		);
-	}
-
-	public function write(string $remotePath, string $localPath)
-	{
-		$this->server->write(
-			$this->getRemotePath($remotePath),
-			$localPath
-		);
-	}
-
-	public function rename(string $originalPath, string $newPath)
-	{
-		$this->server->rename(
-			$this->getRemotePath($originalPath),
-			$this->getRemotePath($newPath)
-		);
-	}
-
-	public function remove(string $remotePath)
-	{
-		$this->server->remove(
-			$this->getRemotePath($remotePath)
-		);
-	}
-
-	private function getRemotePath(string $path):string
-	{
-		return rtrim($this->config['path'], '/') . $path;
+		return new SshServerCore($this->config);
 	}
 
 }
