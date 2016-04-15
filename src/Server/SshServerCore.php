@@ -42,9 +42,9 @@ class SshServerCore implements Server
 	public function write(string $remotePath, string $localPath)
 	{
 		if ($this->isDirectory($remotePath)) {
-			$this->sftp('mkdir', [$remotePath, 0777, TRUE]);
+			$this->writeDirectory($remotePath);
 		} else {
-			$this->ssh('scp_send', [$localPath, $remotePath]);
+			$this->writeFile($remotePath, $localPath);
 		}
 	}
 
@@ -61,6 +61,19 @@ class SshServerCore implements Server
 	private function isDirectory(string $path):bool
 	{
 		return substr($path, -1) === '/';
+	}
+
+	private function writeDirectory(string $remotePath)
+	{
+		$this->sftp('mkdir', [$remotePath, 0777, TRUE]);
+	}
+
+	private function writeFile(string $remotePath, string $localPath)
+	{
+		$parts = explode('/', $remotePath);
+		$this->writeDirectory(implode('/', array_slice($parts, 0, count($parts) - 1)));
+
+		$this->ssh('scp_send', [$localPath, $remotePath]);
 	}
 
 	/**
