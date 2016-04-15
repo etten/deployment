@@ -41,7 +41,11 @@ class SshServerCore implements Server
 
 	public function write(string $remotePath, string $localPath)
 	{
-		$this->ssh('scp_send', [$localPath, $remotePath]);
+		if ($this->isDirectory($remotePath)) {
+			$this->sftp('mkdir', [$remotePath, 0777, TRUE]);
+		} else {
+			$this->ssh('scp_send', [$localPath, $remotePath]);
+		}
 	}
 
 	public function rename(string $originalPath, string $newPath)
@@ -52,6 +56,11 @@ class SshServerCore implements Server
 	public function remove(string $remotePath)
 	{
 		$this->exec('rm -rf ' . $this->escape($remotePath));
+	}
+
+	private function isDirectory(string $path):bool
+	{
+		return substr($path, -1) === '/';
 	}
 
 	/**
@@ -66,6 +75,20 @@ class SshServerCore implements Server
 
 		array_unshift($args, $this->connection);
 		return $this->protect('ssh2_' . $command, $args);
+	}
+
+	/**
+	 * @param string $command SSH command name
+	 * @param array $args
+	 * @return mixed
+	 * @throws SshException
+	 */
+	private function sftp(string $command, array $args = [])
+	{
+		$this->connectSftp();
+
+		array_unshift($args, $this->sftp);
+		return $this->protect('ssh2_sftp_' . $command, $args);
 	}
 
 	private function exec(string $command):string
@@ -83,12 +106,7 @@ class SshServerCore implements Server
 
 	private function sftpPath(string $path):string
 	{
-		$this->connect();
-
-		if (!$this->sftp) {
-			$this->sftp = $this->protect('sftp');
-		}
-
+		$this->connectSftp();
 		return 'ssh2.sftp://' . $this->sftp . $path;
 	}
 
@@ -108,6 +126,16 @@ class SshServerCore implements Server
 
 		$this->connection = $this->protect('ssh2_connect', [$this->config['host'], $this->config['port']]);
 		$this->ssh('auth_password', [$this->config['user'], $this->config['password']]);
+	}
+
+	private function connectSftp()
+	{
+		if ($this->sftp) {
+			return;
+		}
+
+		$this->connect();
+		$this->sftp = $this->ssh('sftp');
 	}
 
 	/**
