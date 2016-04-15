@@ -231,7 +231,7 @@ class FtpServerCore implements Server
 	 */
 	private function protect(string $command, array $args = [])
 	{
-		$ftpExceptionErrorHandler = function ($severity, $message) {
+		$errorHandler = function ($severity, $message) {
 			if (preg_match('~^\w+\(\):\s*(.+)~', $message, $m)) {
 				$message = $m[1];
 			}
@@ -239,7 +239,7 @@ class FtpServerCore implements Server
 			throw new FtpException($message);
 		};
 
-		set_error_handler($ftpExceptionErrorHandler);
+		set_error_handler($errorHandler);
 
 		try {
 			return call_user_func_array($command, $args);
