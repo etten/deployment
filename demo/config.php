@@ -7,6 +7,7 @@ use Etten\Deployment\Jobs;
 $host = '';
 $user = '';
 $password = '';
+$path = '/';
 
 // If you need old FTP instead of SSH: Uncomment this and comment SSH.
 //$server = new Server\FtpServer([
@@ -14,14 +15,14 @@ $password = '';
 //	'user' => $user,
 //	'password' => $password,
 //	'secured' => TRUE, // When TRUE, sometimes fails with: "Unable to build data connection: Operation not permitted" (Windows)
-//	'path' => '/',
+//	'path' => $path,
 //]);
 
 $server = new Server\SshServer([
 	'host' => $host,
 	'user' => $user,
 	'password' => $password,
-	'path' => '/',
+	'path' => $path,
 ]);
 
 $collector = new FileCollector([
