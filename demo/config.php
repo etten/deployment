@@ -45,13 +45,19 @@ $jobs = new Jobs\Jobs([
 	'onStart' => [],
 	'onBeforeUpload' => [],
 	'onBeforeMove' => [
-		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=disable"),
-//		// Alternatively, you can call SSH commands.
-//		new Jobs\SshJob($server, '/bin/php web/index.php deploy:disableApp'),
+//		// If you can't run PHP via SSH, you can manage application via HTTP.
+//		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=disable"),
+		new Jobs\SshJob($server, 'php web/index.php maintainer:disable'),
+	],
+	'onRemote' => [
+		// This runs a remote script which moves and deletes files server-side (faster).
+		new Jobs\SshJob($server, 'php .deploy.php'),
 	],
 	'onFinish' => [
 		new Jobs\FileRenameJob($server, '/app/config/config.production.neon', '/app/config/config.local.neon'),
-		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=enable"),
+//		// If you can't run PHP via SSH, you can manage application via HTTP.
+//		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=enable"),
+		new Jobs\SshJob($server, 'php web/index.php maintainer:enable'),
 	],
 ]);
 

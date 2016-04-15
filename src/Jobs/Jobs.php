@@ -23,6 +23,9 @@ class Jobs
 	private $onBeforeMove = [];
 
 	/** @var Job[] */
+	private $onRemote = [];
+
+	/** @var Job[] */
 	private $onFinish = [];
 
 	/** @var Progress */
@@ -33,6 +36,7 @@ class Jobs
 		$this->onStart = $config['onStart'] ?? [];
 		$this->onBeforeUpload = $config['onBeforeUpload'] ?? [];
 		$this->onBeforeMove = $config['onBeforeMove'] ?? [];
+		$this->onRemote = $config['onRemote'] ?? [];
 		$this->onFinish = $config['onFinish'] ?? [];
 		$this->progress = new VoidProgress();
 	}
@@ -62,9 +66,19 @@ class Jobs
 		$this->invoke($this->onBeforeMove);
 	}
 
+	public function remote()
+	{
+		$this->invoke($this->onRemote);
+	}
+
 	public function finish()
 	{
 		$this->invoke($this->onFinish);
+	}
+
+	public function hasRemote():bool
+	{
+		return !!$this->onRemote;
 	}
 
 	private function invoke($jobs)

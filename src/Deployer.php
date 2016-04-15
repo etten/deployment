@@ -15,6 +15,7 @@ class Deployer
 		'temp' => '/.deploy/',
 		'deployedFile' => '/.deployed',
 		'deletedFile' => '/.deleted',
+		'deployScript' => __DIR__ . '/../scripts/.deploy.php',
 	];
 
 	/** @var Server\Server */
@@ -168,6 +169,15 @@ class Deployer
 	public function writeDeletedList(array $files)
 	{
 		$this->writeFileList($this->config['deletedFile'], $files);
+	}
+
+	public function writeDeployScript()
+	{
+		$scriptName = substr($this->config['deployScript'], strrpos($this->config['deployScript'], '/'));
+		$this->server->write(
+			$scriptName,
+			$this->config['deployScript']
+		);
 	}
 
 	private function writeFileList(string $file, array $files)

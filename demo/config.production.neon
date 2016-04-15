@@ -16,6 +16,10 @@ deployment:
 #			- 'https://HOST/?etten-maintainer-job=disable'
 			- 'ssh php web/index.php maintainer:disable'
 
+		onRemote:
+			# This runs a remote script which moves and deletes files server-side (faster).
+			- 'ssh php .deploy.php'
+
 		onFinish:
 			- 'rename /app/config/config.production.neon /app/config/config.local.neon'
 #			# If you can't run PHP via SSH, you can manage application via HTTP.
