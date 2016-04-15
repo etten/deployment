@@ -39,7 +39,7 @@ class FtpServer implements Server
 
 	public function read(string $remotePath, string $localPath)
 	{
-		return $this->server->read(
+		$this->server->read(
 			$this->getRemotePath($remotePath),
 			$localPath
 		);
@@ -47,7 +47,7 @@ class FtpServer implements Server
 
 	public function write(string $remotePath, string $localPath)
 	{
-		return $this->server->write(
+		$this->server->write(
 			$this->getRemotePath($remotePath),
 			$localPath
 		);
@@ -55,7 +55,7 @@ class FtpServer implements Server
 
 	public function rename(string $originalPath, string $newPath)
 	{
-		return $this->server->rename(
+		$this->server->rename(
 			$this->getRemotePath($originalPath),
 			$this->getRemotePath($newPath)
 		);
@@ -63,7 +63,7 @@ class FtpServer implements Server
 
 	public function remove(string $remotePath)
 	{
-		return $this->server->remove(
+		$this->server->remove(
 			$this->getRemotePath($remotePath)
 		);
 	}

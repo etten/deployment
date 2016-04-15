@@ -65,6 +65,8 @@ class FileCollector implements Collector
 		$this->progress->log(sprintf('Checking %s', $directory ?: '/'));
 
 		$list = [];
+
+		/** @var \Directory $iterator */
 		$iterator = dir($this->basePath . $directory);
 
 		while (($entry = $iterator->read())) {
