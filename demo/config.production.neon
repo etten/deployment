@@ -12,10 +12,12 @@ deployment:
 
 	jobs:
 		onBeforeMove:
-			- 'https://HOST/?etten-maintainer-job=disable'
-#			# Alternatively, you can call SSH commands.
-#			- 'ssh /bin/php web/index.php deploy:disableApp'
+#			# If you can't run PHP via SSH, you can manage application via HTTP.
+#			- 'https://HOST/?etten-maintainer-job=disable'
+			- 'ssh php web/index.php maintainer:disable'
 
 		onFinish:
 			- 'rename /app/config/config.production.neon /app/config/config.local.neon'
-			- 'https://HOST/?etten-maintainer-job=enable'
+#			# If you can't run PHP via SSH, you can manage application via HTTP.
+#			- 'https://HOST/?etten-maintainer-job=enable'
+			- 'ssh php web/index.php maintainer:enable'
