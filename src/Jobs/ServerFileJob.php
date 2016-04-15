@@ -9,7 +9,7 @@ namespace Etten\Deployment\Jobs;
 
 use Etten\Deployment\Server\Server;
 
-abstract class ServerFileJob implements Job
+abstract class ServerFileJob extends AbstractJob
 {
 
 	/** @var Server */

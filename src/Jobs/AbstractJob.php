@@ -9,13 +9,15 @@ namespace Etten\Deployment\Jobs;
 
 use Etten\Deployment\Progress;
 
-interface Job
+abstract class AbstractJob implements Job
 {
 
-	public function setProgress(Progress $progress);
+	/** @var Progress */
+	protected $progress;
 
-	public function getName():string;
-
-	public function run();
+	public function setProgress(Progress $progress)
+	{
+		$this->progress = $progress;
+	}
 
 }

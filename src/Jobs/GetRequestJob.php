@@ -7,7 +7,7 @@
 
 namespace Etten\Deployment\Jobs;
 
-class GetRequestJob implements Job
+class GetRequestJob extends AbstractJob
 {
 
 	/** @var string */
@@ -28,6 +28,8 @@ class GetRequestJob implements Job
 		$response = @file_get_contents($this->url);
 		if ($response === FALSE) {
 			throw new JobException(sprintf('Request failed.'));
+		} else {
+			$this->progress->log($response);
 		}
 	}
 

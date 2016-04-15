@@ -9,7 +9,7 @@ namespace Etten\Deployment\Jobs;
 
 use Etten\Deployment\Server\SshServer;
 
-class SshJob implements Job
+class SshJob extends AbstractJob
 {
 
 	/** @var SshServer */
@@ -31,7 +31,8 @@ class SshJob implements Job
 
 	public function run()
 	{
-		$this->ssh->exec($this->command);
+		$response = $this->ssh->exec($this->command);
+		$this->progress->log($response);
 	}
 
 }

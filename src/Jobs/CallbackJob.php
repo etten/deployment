@@ -7,7 +7,7 @@
 
 namespace Etten\Deployment\Jobs;
 
-class CallbackJob implements Job
+class CallbackJob extends AbstractJob
 {
 
 	/** @var string */
@@ -29,7 +29,7 @@ class CallbackJob implements Job
 
 	public function run()
 	{
-		call_user_func($this->closure);
+		call_user_func($this->closure, $this->progress);
 	}
 
 }

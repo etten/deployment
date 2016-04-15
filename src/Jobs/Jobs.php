@@ -103,6 +103,8 @@ class Jobs
 	 */
 	private function runJob(Job $job)
 	{
+		$job->setProgress($this->progress);
+
 		// Kdyby\Events support
 		if ($job instanceof \Closure) {
 			$job = $job->__invoke();
