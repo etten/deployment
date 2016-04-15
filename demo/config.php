@@ -17,7 +17,7 @@ $password = '';
 //	'path' => '/',
 //]);
 
-$server = new Server\SshServerCore([
+$server = new Server\SshServer([
 	'host' => $host,
 	'user' => $user,
 	'password' => $password,
