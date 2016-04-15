@@ -11,7 +11,7 @@ class SshServer extends ServerProxy
 {
 
 	/** @var array */
-	private $config = [
+	protected $config = [
 		'host' => NULL,
 		'port' => 22,
 		'user' => NULL,
