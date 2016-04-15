@@ -1,5 +1,19 @@
 deployment:
-	ftp:
+#	# If you need old FTP instead of SSH: Uncomment this and comment SSH.
+#	ftp:
+#		host:
+#		user:
+#		password:
+
+	ssh:
 		host:
 		user:
 		password:
+
+	jobs:
+		onBeforeMove:
+			- 'https://HOST/?etten-maintainer-job=disable'
+
+		onFinish:
+			- 'rename /app/config/config.production.neon /app/config/config.local.neon'
+			- 'https://HOST/?etten-maintainer-job=enable'
