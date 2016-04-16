@@ -40,8 +40,8 @@ class Deploy
 		$deleted = $this->root . $this->deleted;
 		if (is_file($deleted)) {
 			$files = $this->readDeletedFiles($deleted);
-			foreach ($files as $file => $hash) {
-				$this->delete($file);
+			foreach ($files as $file) {
+				$this->delete($this->root . '/' . $file);
 			}
 
 			$this->delete($deleted);
