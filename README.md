@@ -1,6 +1,6 @@
 # Etten\Deployment
 
-Simple PHP FTP deployment tool.
+Simple PHP SSH/FTP deployment tool.
 
 Inspired by [dg/ftp-deployment](https://github.com/dg/ftp-deployment).
 
@@ -18,6 +18,17 @@ If you have deployed applications with that tool, simply start using **etten/dep
 It can read dg/ftp-deployment deployed files database and simply continue only with modified files.
 
 *This is tested with dg/ftp-deployment v2.5.*
+
+
+## Continuous Delivery, Automatic Deployment
+
+This tool allows you continuously and automatically deliver your application.
+
+You can use i.e. [Shippable](https://shippable.com/) for your CI/CD.
+
+I suggest you tu use [phpdocker/phpdocker](https://github.com/phpdocker/phpdocker) build image for this purposes.
+
+After build is completed, simply run this deploy tool - it's a CLI PHP tool.
 
 
 ## Usage
@@ -38,7 +49,7 @@ It doesn't require comments. You can find directives in the config.
 After install, run it via CLI:
 
 ```bash
-$ php www/index.php deployment
+$ php www/index.php deployment -h
 ```
 
 It's a Kdyby Console Application, so [read the Docs](https://github.com/Kdyby/Console/blob/master/docs/en/index.md) first.
