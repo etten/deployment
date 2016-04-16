@@ -36,7 +36,7 @@ class SshServerCore implements Server
 
 	public function read(string $remotePath, string $localPath)
 	{
-		copy($this->sftpPath($remotePath), $localPath);
+		$this->protect('copy', [$this->sftpPath($remotePath), $localPath]);
 	}
 
 	public function write(string $remotePath, string $localPath)
@@ -162,12 +162,12 @@ class SshServerCore implements Server
 	}
 
 	/**
-	 * @param string $command
+	 * @param callable $command
 	 * @param array $args
 	 * @return mixed
 	 * @throws SshException
 	 */
-	private function protect(string $command, array $args = [])
+	private function protect(callable $command, array $args = [])
 	{
 		$errorHandler = function ($severity, $message) {
 			if (preg_match('~^\w+\(\):\s*(.+)~', $message, $m)) {
