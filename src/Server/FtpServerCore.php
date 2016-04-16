@@ -224,12 +224,12 @@ class FtpServerCore implements Server
 	}
 
 	/**
-	 * @param string $command
+	 * @param callable $command
 	 * @param array $args
 	 * @return mixed
 	 * @throws FtpException
 	 */
-	private function protect(string $command, array $args = [])
+	private function protect(callable $command, array $args = [])
 	{
 		$errorHandler = function ($severity, $message) {
 			if (preg_match('~^\w+\(\):\s*(.+)~', $message, $m)) {
