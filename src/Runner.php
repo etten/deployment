@@ -61,7 +61,7 @@ class Runner
 			$this->deployer->checkPrevious();
 		}
 
-		$this->progress->log(sprintf('Started at %s', date('r')));
+		$this->progress->log(date('Y-m-d H:i:s') . ': Starting.');
 		$this->progress->log('');
 		$this->jobs->start();
 
@@ -94,6 +94,8 @@ class Runner
 		// Upload all new files
 		if ($toUpload) {
 			$this->jobs->beforeUpload();
+
+			$this->progress->log(date('Y-m-d H:i:s') . ': Uploading.');
 			$this->deployer->uploadFiles($toUpload);
 		}
 
@@ -119,9 +121,11 @@ class Runner
 		}
 
 		if ($this->jobs->hasRemote()) {
+			$this->progress->log(date('Y-m-d H:i:s') . ': Remote script launching.');
 			$this->jobs->remote();
 		} else {
 			if ($toUpload) {
+				$this->progress->log(date('Y-m-d H:i:s') . ': File moving.');
 				$this->deployer->moveFiles($toUpload);
 			}
 
@@ -137,6 +141,7 @@ class Runner
 		// Delete not tracked files
 		if (!$this->jobs->hasRemote()) {
 			if ($toDelete) {
+				$this->progress->log(date('Y-m-d H:i:s') . ': File deletion.');
 				$this->deployer->deleteFiles($toDelete);
 			}
 
@@ -150,6 +155,7 @@ class Runner
 		}
 
 		$this->jobs->finish();
+		$this->progress->log(date('Y-m-d H:i:s') . ': Everything done.');
 	}
 
 	private function showList(array $toUpload, array $toDelete)
