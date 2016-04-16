@@ -36,7 +36,7 @@ class SshServerCore implements Server
 
 	public function read(string $remotePath, string $localPath)
 	{
-		$this->ssh('scp_recv', [$remotePath, $localPath]);
+		copy($this->sftpPath($remotePath), $localPath);
 	}
 
 	public function write(string $remotePath, string $localPath)
@@ -86,7 +86,12 @@ class SshServerCore implements Server
 		$parts = explode('/', $remotePath);
 		$this->writeDirectory(implode('/', array_slice($parts, 0, count($parts) - 1)));
 
-		$this->ssh('scp_send', [$localPath, $remotePath]);
+		$localFs = fopen($localPath, 'rb');
+		$remoteFs = fopen($this->sftpPath($remotePath), 'wb');
+		while (!feof($localFs)) {
+			$s = fread($localFs, 100 * 1024); // 100kB chunks
+			fwrite($remoteFs, $s, strlen($s));
+		}
 	}
 
 	/**
