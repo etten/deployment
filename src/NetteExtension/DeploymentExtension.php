@@ -74,16 +74,7 @@ class DeploymentExtension extends DI\CompilerExtension
 			->setAutowired(FALSE);
 
 		// Prefer SSH over FTP.
-		if ($config['ssh']['host']) {
-			$builder
-				->addDefinition($this->prefixEnvironment('server', $name))
-				->setClass(
-					Deployment\Server\SshServer::class,
-					[['path' => $config['paths']['remote']] + $config['ssh']]
-				)
-				->setAutowired(FALSE);
-
-		} elseif ($config['ftp']['host']) {
+		if ($config['ftp']['host'] && !$config['ssh']['host']) {
 			$builder
 				->addDefinition($this->prefixEnvironment('server', $name))
 				->setClass(
@@ -91,9 +82,14 @@ class DeploymentExtension extends DI\CompilerExtension
 					[['path' => $config['paths']['remote']] + $config['ftp']]
 				)
 				->setAutowired(FALSE);
-
 		} else {
-			throw new \RuntimeException('SSH nor FTP configuration is not set.');
+			$builder
+				->addDefinition($this->prefixEnvironment('server', $name))
+				->setClass(
+					Deployment\Server\SshServer::class,
+					[['path' => $config['paths']['remote']] + $config['ssh']]
+				)
+				->setAutowired(FALSE);
 		}
 
 		$builder
