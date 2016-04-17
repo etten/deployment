@@ -73,21 +73,25 @@ class DeploymentExtension extends DI\CompilerExtension
 			->setClass(Deployment\Jobs\Jobs::class, [$this->buildJobs($name, $config)])
 			->setAutowired(FALSE);
 
-		// Prefer SSH over FTP.
-		if ($config['ftp']['host'] && !$config['ssh']['host']) {
+		// Prefer SSH over FTP. But not both together.
+		if ($this->isFtp($config)) {
+			unset($config['ssh']);
+
 			$builder
 				->addDefinition($this->prefixEnvironment('server', $name))
 				->setClass(
 					Deployment\Server\FtpServer::class,
-					[['path' => $config['paths']['remote']] + $config['ftp']]
+					[['path' => $config['paths']['remote']] + ($config['ftp'] ?? [])]
 				)
 				->setAutowired(FALSE);
 		} else {
+			unset($config['ftp']);
+
 			$builder
 				->addDefinition($this->prefixEnvironment('server', $name))
 				->setClass(
 					Deployment\Server\SshServer::class,
-					[['path' => $config['paths']['remote']] + $config['ssh']]
+					[['path' => $config['paths']['remote']] + ($config['ssh'] ?? [])]
 				)
 				->setAutowired(FALSE);
 		}
@@ -156,9 +160,11 @@ class DeploymentExtension extends DI\CompilerExtension
 
 	private function expandJob(string $job, string $environment, array $config):DI\Statement
 	{
-		$job = str_replace('HOST', $config['ssh']['host'] ?: $config['ftp']['host'], $job);
-		$job = str_replace('USER', $config['ssh']['user'] ?: $config['ftp']['user'], $job);
-		$job = str_replace('PASSWORD', $config['ssh']['password'] ?: $config['ftp']['password'], $job);
+		$isFtp = $this->isFtp($config);
+
+		$job = str_replace('HOST', $isFtp ? $config['ftp']['host'] : $config['ssh']['host'], $job);
+		$job = str_replace('USER', $isFtp ? $config['ftp']['user'] : $config['ssh']['user'], $job);
+		$job = str_replace('PASSWORD', $isFtp ? $config['ftp']['password'] : $config['ssh']['password'], $job);
 
 		if (preg_match('~^https?://.+~', $job)) {
 			return new DI\Statement(Deployment\Jobs\GetRequestJob::class, [$job]);
@@ -187,6 +193,11 @@ class DeploymentExtension extends DI\CompilerExtension
 		}
 
 		throw new \RuntimeException('Job was not recognized.');
+	}
+
+	private function isFtp(array $config):bool
+	{
+		return empty($config['ssh']['host']) && !empty($config['ftp']['host']);
 	}
 
 }
