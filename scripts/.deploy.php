@@ -69,32 +69,45 @@ class Deploy
 
 	private function rename(string $from, string $to)
 	{
-		if (is_dir($from)) {
-			foreach ($this->readFiles($from) as $file) {
-				$this->rename($from . '/' . $file, $to . '/' . $file);
-			}
+		if ($this->isCli()) {
+			exec('mv -f ' . escapeshellarg($from) . ' ' . escapeshellarg($to));
+		} else {
+			if (is_dir($from)) {
+				foreach ($this->readFiles($from) as $file) {
+					$this->rename($from . '/' . $file, $to . '/' . $file);
+				}
 
-			if (is_dir($to)) {
-				rmdir($from);
+				if (is_dir($to)) {
+					rmdir($from);
+				} else {
+					rename($from, $to);
+				}
+
 			} else {
 				rename($from, $to);
 			}
-
-		} else {
-			rename($from, $to);
 		}
 	}
 
 	private function delete(string $path)
 	{
-		if (is_dir($path)) {
-			foreach ($this->readFiles($path) as $file) {
-				$this->delete($path . '/' . $file);
-			}
-			rmdir($path);
+		if ($this->isCli()) {
+			exec('rm -rf ' . escapeshellarg($path));
 		} else {
-			unlink($path);
+			if (is_dir($path)) {
+				foreach ($this->readFiles($path) as $file) {
+					$this->delete($path . '/' . $file);
+				}
+				rmdir($path);
+			} else {
+				unlink($path);
+			}
 		}
+	}
+
+	private function isCli():bool
+	{
+		return php_sapi_name() === 'cli';
 	}
 
 }
