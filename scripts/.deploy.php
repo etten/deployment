@@ -72,20 +72,25 @@ class Deploy
 		if ($this->isCli()) {
 			exec('mv -f ' . escapeshellarg($from) . ' ' . escapeshellarg($to));
 		} else {
-			if (is_dir($from)) {
-				foreach ($this->readFiles($from) as $file) {
-					$this->rename($from . '/' . $file, $to . '/' . $file);
-				}
+			$this->renamePhp($from, $to);
+		}
+	}
 
-				if (is_dir($to)) {
-					rmdir($from);
-				} else {
-					rename($from, $to);
-				}
+	private function renamePhp(string $from, string $to)
+	{
+		if (is_dir($from)) {
+			foreach ($this->readFiles($from) as $file) {
+				$this->renamePhp($from . '/' . $file, $to . '/' . $file);
+			}
 
+			if (is_dir($to)) {
+				rmdir($from);
 			} else {
 				rename($from, $to);
 			}
+
+		} else {
+			rename($from, $to);
 		}
 	}
 
@@ -94,14 +99,19 @@ class Deploy
 		if ($this->isCli()) {
 			exec('rm -rf ' . escapeshellarg($path));
 		} else {
-			if (is_dir($path)) {
-				foreach ($this->readFiles($path) as $file) {
-					$this->delete($path . '/' . $file);
-				}
-				rmdir($path);
-			} else {
-				unlink($path);
+			$this->deletePhp($path);
+		}
+	}
+
+	private function deletePhp(string $path)
+	{
+		if (is_dir($path)) {
+			foreach ($this->readFiles($path) as $file) {
+				$this->deletePhp($path . '/' . $file);
 			}
+			rmdir($path);
+		} else {
+			unlink($path);
 		}
 	}
 
