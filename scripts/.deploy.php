@@ -76,7 +76,7 @@ class Deploy
 	private function renameSystem(string $from, string $to)
 	{
 		if (is_dir($from)) {
-			passthru('cp -a ' . escapeshellarg($from . '/.') . ' ' . escapeshellarg($to . '/'));
+			passthru('cp -al ' . escapeshellarg($from . '/.') . ' ' . escapeshellarg($to . '/'));
 			$this->deleteSystem($from);
 		} else {
 			passthru('mv -f ' . escapeshellarg($from) . ' ' . escapeshellarg($to));
