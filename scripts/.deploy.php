@@ -28,10 +28,7 @@ class Deploy
 	{
 		$temp = $this->root . $this->temp;
 		if (is_dir($temp)) {
-			$files = $this->readFiles($temp);
-			foreach ($files as $file) {
-				$this->rename($temp . '/' . $file, $this->root . '/' . $file);
-			}
+			$this->rename($temp, $this->root);
 		}
 	}
 
@@ -70,9 +67,19 @@ class Deploy
 	private function rename(string $from, string $to)
 	{
 		if ($this->isCli()) {
-			exec('mv -f ' . escapeshellarg($from) . ' ' . escapeshellarg($to));
+			$this->renameSystem($from, $to);
 		} else {
 			$this->renamePhp($from, $to);
+		}
+	}
+
+	private function renameSystem(string $from, string $to)
+	{
+		if (is_dir($from)) {
+			passthru('cp -a ' . escapeshellarg($from . '/.') . ' ' . escapeshellarg($to . '/'));
+			$this->deleteSystem($from);
+		} else {
+			passthru('mv -f ' . escapeshellarg($from) . ' ' . escapeshellarg($to));
 		}
 	}
 
@@ -97,10 +104,15 @@ class Deploy
 	private function delete(string $path)
 	{
 		if ($this->isCli()) {
-			exec('rm -rf ' . escapeshellarg($path));
+			$this->deleteSystem($path);
 		} else {
 			$this->deletePhp($path);
 		}
+	}
+
+	private function deleteSystem(string $path)
+	{
+		passthru('rm -rf ' . escapeshellarg($path));
 	}
 
 	private function deletePhp(string $path)
