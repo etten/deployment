@@ -50,7 +50,12 @@ class SshServerCore implements Server
 
 	public function rename(string $originalPath, string $newPath)
 	{
-		$this->exec('mv -f ' . $this->escape($originalPath) . ' ' . $this->escape($newPath));
+		if ($this->isDirectory($originalPath)) {
+			$this->exec('cp -a ' . $this->escape($originalPath . '/.') . ' ' . $this->escape($newPath . '/'));
+			$this->remove($originalPath);
+		} else {
+			$this->exec('mv -f ' . $this->escape($originalPath) . ' ' . $this->escape($newPath));
+		}
 	}
 
 	public function remove(string $remotePath)
