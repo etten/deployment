@@ -28,7 +28,10 @@ class Deploy
 	{
 		$temp = $this->root . $this->temp;
 		if (is_dir($temp)) {
-			$this->rename($temp, $this->root);
+			// Move temp directory contents to root
+			foreach ($this->readFiles($temp) as $file) {
+				$this->rename($temp . '/' . $file, $this->root . '/' . $file);
+			}
 		}
 	}
 
