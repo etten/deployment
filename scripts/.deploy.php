@@ -28,10 +28,7 @@ class Deploy
 	{
 		$temp = $this->root . $this->temp;
 		if (is_dir($temp)) {
-			// Move temp directory contents to root
-			foreach ($this->readFiles($temp) as $file) {
-				$this->rename($temp . '/' . $file, $this->root . '/' . $file);
-			}
+			$this->rename($temp, $this->root);
 		}
 	}
 
@@ -79,7 +76,7 @@ class Deploy
 	private function renameSystem(string $from, string $to)
 	{
 		if (is_dir($from)) {
-			passthru('cp -al ' . escapeshellarg($from . '/.') . ' ' . escapeshellarg($to . '/'));
+			passthru('cp -alf ' . escapeshellarg($from . '/.') . ' ' . escapeshellarg($to . '/'));
 			$this->deleteSystem($from);
 		} else {
 			passthru('mv -f ' . escapeshellarg($from) . ' ' . escapeshellarg($to));
