@@ -186,6 +186,10 @@ class DeploymentExtension extends DI\CompilerExtension
 		}
 
 		if (preg_match('~^ssh (.+?)$~', $job, $m)) {
+			if ($isFtp) {
+				throw new \RuntimeException('Cannot use SSH jobs when FTP is configured and SSH not. Remove FTP configuration or SSH-related jobs.');
+			}
+
 			return new DI\Statement(Deployment\Jobs\SshJob::class, [
 				'@' . $this->prefixEnvironment('server', $environment),
 				$m[1],
