@@ -165,6 +165,7 @@ class DeploymentExtension extends DI\CompilerExtension
 		$job = str_replace('HOST', $isFtp ? $config['ftp']['host'] : $config['ssh']['host'], $job);
 		$job = str_replace('USER', $isFtp ? $config['ftp']['user'] : $config['ssh']['user'], $job);
 		$job = str_replace('PASSWORD', $isFtp ? $config['ftp']['password'] : $config['ssh']['password'], $job);
+		$job = str_replace(['PATH', '~'], $config['paths']['remote'], $job);
 
 		if (preg_match('~^https?://.+~', $job)) {
 			return new DI\Statement(Deployment\Jobs\GetRequestJob::class, [$job]);
