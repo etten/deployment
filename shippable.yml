@@ -1,7 +1,5 @@
 build_image: phpdocker/phpdocker:7.0
-
-language: php
-php: 7.0
+language: none
 
 env:
   global:
