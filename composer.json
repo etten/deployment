@@ -16,7 +16,7 @@
         "phpunit/phpunit": "^5.1",
         "squizlabs/php_codesniffer": "~2.6.0",
         "mikey179/vfsStream": "^1.6",
-        "etten/codestyle": "^1.0",
+        "etten/codestyle": "^2.0",
         "symfony/console": "^2.8",
         "nette/di": "^2.3"
     },
