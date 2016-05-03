@@ -7,6 +7,7 @@
 
 namespace Tests\Unit;
 
+use Etten\Deployment\FileCollector;
 use org\bovigo\vfs;
 
 class FileCollectorTest extends \PHPUnit_Framework_TestCase
@@ -78,6 +79,7 @@ class FileCollectorTest extends \PHPUnit_Framework_TestCase
 				'!/temp/cache',
 				'/temp/cache/*',
 			],
+			'force' => [],
 		]);
 		$this->assertSame($expected, $collector->collect());
 	}
