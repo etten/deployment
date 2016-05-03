@@ -16,6 +16,7 @@ class SshServerCore implements Server
 		'port' => 22,
 		'user' => NULL,
 		'password' => NULL,
+		'nonZeroCodeException' => TRUE,
 	];
 
 	/** @var resource|null */
@@ -70,10 +71,29 @@ class SshServerCore implements Server
 	 */
 	public function exec(string $command):string
 	{
+		// Support remote exit code
+		// @see http://stackoverflow.com/a/10514974
+		$command = '(' . $command . ');echo -e "\n$?"';
+
 		$stream = $this->ssh('exec', [$command]);
 		stream_set_blocking($stream, TRUE);
 		$streamOut = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-		return stream_get_contents($streamOut);
+		$response = stream_get_contents($streamOut);
+
+		// Parse response & exit code
+		$lines = explode("\n", trim($response));
+		$exitCode = (int)array_pop($lines);
+		$message = implode("\n", $lines);
+
+		if ($this->config['nonZeroCodeException'] && $exitCode > 0) {
+			$error = trim($message) ?
+				sprintf('Server returned a non-zero exit code (%d) with message "%s".', $exitCode, $message) :
+				sprintf('Server returned a non-zero exit code (%d).', $exitCode);
+
+			throw new SshException($error);
+		} else {
+			return $message;
+		}
 	}
 
 	private function isDirectory(string $path):bool
