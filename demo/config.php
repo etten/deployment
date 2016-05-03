@@ -27,7 +27,12 @@ $server = new Server\SshServer([
 
 $collector = new FileCollector([
 	'path' => __DIR__ . '/../',
-	'ignore' => [],
+	'ignore' => [
+		'/.idea',
+	],
+	'force' => [
+		'/app/config/config.production.neon',
+	],
 ]);
 
 $deployer = new Deployer(
@@ -47,7 +52,7 @@ $jobs = new Jobs\Jobs([
 	'onBeforeMove' => [
 //		// If you can't run PHP via SSH, you can manage application via HTTP.
 //		new Jobs\GetRequestJob("https://$host/?etten-maintainer-job=disable"),
-		new Jobs\SshJob($server, "php {$path}web/index.php maintainer:disable"),
+		new Jobs\SilentSshJob($server, "php {$path}web/index.php maintainer:disable"),
 	],
 	'onRemote' => [
 		// This runs a remote script which moves and deletes files server-side (faster).

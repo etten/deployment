@@ -30,6 +30,7 @@ class DeploymentExtension extends DI\CompilerExtension
 			'local' => '%rootDir%',
 			'remote' => '/',
 			'ignore' => [],
+			'force' => [],
 		],
 		'jobs' => [
 			'onStart' => [],
@@ -102,6 +103,7 @@ class DeploymentExtension extends DI\CompilerExtension
 				[
 					'path' => $config['paths']['local'],
 					'ignore' => $config['paths']['ignore'],
+					'force' => $config['paths']['force'],
 				],
 			])
 			->setAutowired(FALSE);

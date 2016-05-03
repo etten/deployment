@@ -21,6 +21,9 @@ class FileCollector implements Collector
 		'.DS_Store',
 	];
 
+	/** @var string[] */
+	private $forcedPaths = [];
+
 	/** @var Progress */
 	private $progress;
 
@@ -28,6 +31,7 @@ class FileCollector implements Collector
 	{
 		$this->basePath = $config['path'];
 		$this->ignoreMasks = array_merge($this->ignoreMasks, $config['ignore']);
+		$this->forcedPaths = array_merge($this->forcedPaths, $config['force']);
 		$this->progress = new VoidProgress();
 	}
 
@@ -84,7 +88,14 @@ class FileCollector implements Collector
 				$list += $this->collectRecursively($shortPath);
 
 			} elseif (is_file($fullPath)) {
-				$list[$shortPath] = $this->hashFile($fullPath);
+				// If path is force-deployed, create a unique hash
+				if (in_array($shortPath, $this->forcedPaths)) {
+					$hash = uniqid(TRUE);
+				} else {
+					$hash = $this->hashFile($fullPath);
+				}
+
+				$list[$shortPath] = $hash;
 			}
 		}
 
