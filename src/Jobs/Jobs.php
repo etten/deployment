@@ -89,7 +89,7 @@ class Jobs
 
 			} catch (JobException $e) {
 				$this->progress->log(sprintf('Job failed with message: %s', $e->getMessage()));
-				$continue = $this->progress->ask('Continue anyway?', TRUE);
+				$continue = $this->progress->ask('Continue anyway?', FALSE);
 				if (!$continue) {
 					throw $e;
 				}
