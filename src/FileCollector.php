@@ -16,7 +16,7 @@ class FileCollector implements Collector
 	/** @var string[] */
 	private $ignoreMasks = [
 		'*.local.neon',
-		'.git*',
+		'.git',
 		'Thumbs.db',
 		'.DS_Store',
 	];

@@ -63,6 +63,7 @@ class FileCollectorTest extends \PHPUnit_Framework_TestCase
 			'/src/Etten/' => TRUE,
 			'/src/Etten/Deployment/' => TRUE,
 			'/src/Etten/Deployment/Deployment.php' => 'd45640831d1b9eb5c966a1345538a587',
+			'/.gitignore' => 'd45640831d1b9eb5c966a1345538a587',
 			'/.htaccess' => 'd45640831d1b9eb5c966a1345538a587',
 		];
 
