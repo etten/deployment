@@ -28,6 +28,9 @@ class Runner
 	/** @var bool */
 	private $uploadOnly = FALSE;
 
+	/** @var bool */
+	private $remoteOnly = FALSE;
+
 	public function __construct(
 		Progress $progress,
 		Jobs\Jobs $jobs,
@@ -68,9 +71,19 @@ class Runner
 		return $this;
 	}
 
+	/**
+	 * @param bool $remoteOnly
+	 * @return $this
+	 */
+	public function setRemoteOnly(bool $remoteOnly)
+	{
+		$this->remoteOnly = $remoteOnly;
+		return $this;
+	}
+
 	public function run()
 	{
-		if (!$this->forced) {
+		if (!$this->forced || $this->remoteOnly) {
 			$this->deployer->checkPrevious();
 		}
 
@@ -78,68 +91,73 @@ class Runner
 		$this->progress->log('');
 		$this->jobs->start();
 
-		// Collect files
-		$localFiles = $this->deployer->findLocalFiles();
+		if ($this->remoteOnly) {
+			if (!$this->jobs->hasRemote()) {
+				throw new Exception('"Remote-only" option is available only when "remote" (onRemote) job is set.');
+			}
 
-		$this->progress->log(sprintf('%d local files and directories found.', count($localFiles)));
+		} else {
+			// Collect files
+			$localFiles = $this->deployer->findLocalFiles();
 
-		$deployedFiles = $this->deployer->findDeployedFiles();
-		$this->progress->log(sprintf('%d deployed files and directories found.', count($deployedFiles)));
+			$this->progress->log(sprintf('%d local files and directories found.', count($localFiles)));
 
-		$toUpload = $this->deployer->filterFilesToDeploy($localFiles, $deployedFiles);
-		$this->progress->log(sprintf('%d files and directories to upload.', count($toUpload)));
+			$deployedFiles = $this->deployer->findDeployedFiles();
+			$this->progress->log(sprintf('%d deployed files and directories found.', count($deployedFiles)));
 
-		$toDelete = $this->deployer->filterFilesToDelete($localFiles, $deployedFiles);
-		$this->progress->log(sprintf('%d files and directories to delete.', count($toDelete)));
+			$toUpload = $this->deployer->filterFilesToDeploy($localFiles, $deployedFiles);
+			$this->progress->log(sprintf('%d files and directories to upload.', count($toUpload)));
 
-		$this->progress->log('');
+			$toDelete = $this->deployer->filterFilesToDelete($localFiles, $deployedFiles);
+			$this->progress->log(sprintf('%d files and directories to delete.', count($toDelete)));
 
-		// Show only the list?
-		if ($this->testOnly) {
-			$this->progress->log('SHOWING LIST OF FILES ONLY.');
-			$this->progress->log('Nothing will be uploaded or deleted on the server.');
 			$this->progress->log('');
 
-			$this->showList($toUpload, $toDelete);
-			return;
-		}
+			// Show only the list?
+			if ($this->testOnly) {
+				$this->progress->log('SHOWING LIST OF FILES ONLY.');
+				$this->progress->log('Nothing will be uploaded or deleted on the server.');
+				$this->progress->log('');
 
-		// Upload only?
-		if ($this->uploadOnly) {
-			$this->progress->log('UPLOADING FILES TO TEMP ONLY.');
-			$this->progress->log('Nothing will be replaced or deleted on the server.');
+				$this->showList($toUpload, $toDelete);
+				return;
+			}
+
+			// Upload only?
+			if ($this->uploadOnly) {
+				$this->progress->log('UPLOADING FILES TO TEMP ONLY.');
+				$this->progress->log('Nothing will be replaced or deleted on the server.');
+				$this->progress->log('');
+			}
+
+			// Upload all new files
+			if ($toUpload) {
+				$this->jobs->beforeUpload();
+
+				$this->progress->log(date('Y-m-d H:i:s') . ': Uploading.');
+				$this->deployer->uploadFiles($toUpload);
+			}
+
+			$this->progress->log(sprintf('%d files and directories uploaded.', count($toUpload)));
 			$this->progress->log('');
-		}
 
-		// Upload all new files
-		if ($toUpload) {
-			$this->jobs->beforeUpload();
+			if ($toDelete) {
+				$this->deployer->writeDeletedList($toDelete);
+			}
 
-			$this->progress->log(date('Y-m-d H:i:s') . ': Uploading.');
-			$this->deployer->uploadFiles($toUpload);
-		}
+			// Create & Upload File Lists
+			if ($toUpload || $toDelete) {
+				$this->deployer->writeDeployedList($localFiles);
 
-		$this->progress->log(sprintf('%d files and directories uploaded.', count($toUpload)));
-		$this->progress->log('');
-
-		if ($toDelete) {
-			$this->deployer->writeDeletedList($toDelete);
-		}
-
-		// Create & Upload File Lists
-		if ($toUpload || $toDelete) {
-			$this->deployer->writeDeployedList($localFiles);
-
-			if ($this->jobs->hasRemote()) {
-				$this->deployer->writeDeployScript();
+				if ($this->jobs->hasRemote()) {
+					$this->deployer->writeDeployScript();
+				}
 			}
 		}
 
 		if (!$this->uploadOnly) {
 			// Move uploaded files
-			if ($toUpload) {
-				$this->jobs->beforeMove();
-			}
+			$this->jobs->beforeMove();
 
 			if ($this->jobs->hasRemote()) {
 				$this->progress->log(date('Y-m-d H:i:s') . ': Remote script launching.');

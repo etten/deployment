@@ -57,6 +57,12 @@ class DeploymentCommand extends Console\Command\Command
 				Console\Input\InputOption::VALUE_NONE,
 				'Upload files to temporary directory only. ' .
 				'Not call server-side scripts and do not replace and delete remote files.'
+			)
+			->addOption(
+				'remote-only',
+				'r',
+				Console\Input\InputOption::VALUE_NONE,
+				'Move and delete files on remote only. Not upload anything new.'
 			);
 	}
 
@@ -82,6 +88,7 @@ class DeploymentCommand extends Console\Command\Command
 		$deployment->setTestOnly($input->getOption('test'));
 		$deployment->setForced($input->getOption('force'));
 		$deployment->setUploadOnly($input->getOption('upload-only'));
+		$deployment->setRemoteOnly($input->getOption('remote-only'));
 
 		$deployment->run();
 	}
