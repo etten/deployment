@@ -25,6 +25,9 @@ class Runner
 	/** @var bool */
 	private $forced = FALSE;
 
+	/** @var bool */
+	private $uploadOnly = FALSE;
+
 	public function __construct(
 		Progress $progress,
 		Jobs\Jobs $jobs,
@@ -52,6 +55,16 @@ class Runner
 	public function setForced(bool $forced)
 	{
 		$this->forced = $forced;
+		return $this;
+	}
+
+	/**
+	 * @param bool $uploadOnly
+	 * @return $this
+	 */
+	public function setUploadOnly(bool $uploadOnly)
+	{
+		$this->uploadOnly = $uploadOnly;
 		return $this;
 	}
 
@@ -91,6 +104,13 @@ class Runner
 			return;
 		}
 
+		// Upload only?
+		if ($this->uploadOnly) {
+			$this->progress->log('UPLOADING FILES TO TEMP ONLY.');
+			$this->progress->log('Nothing will be replaced or deleted on the server.');
+			$this->progress->log('');
+		}
+
 		// Upload all new files
 		if ($toUpload) {
 			$this->jobs->beforeUpload();
@@ -115,46 +135,49 @@ class Runner
 			}
 		}
 
-		// Move uploaded files
-		if ($toUpload) {
-			$this->jobs->beforeMove();
-		}
-
-		if ($this->jobs->hasRemote()) {
-			$this->progress->log(date('Y-m-d H:i:s') . ': Remote script launching.');
-			$this->jobs->remote();
-		} else {
+		if (!$this->uploadOnly) {
+			// Move uploaded files
 			if ($toUpload) {
-				$this->progress->log(date('Y-m-d H:i:s') . ': File moving.');
-				$this->deployer->moveFiles($toUpload);
+				$this->jobs->beforeMove();
 			}
 
-			$this->progress->log(sprintf('%d files and directories moved from temp to production.', count($toUpload)));
-			$this->progress->log('');
-		}
+			if ($this->jobs->hasRemote()) {
+				$this->progress->log(date('Y-m-d H:i:s') . ': Remote script launching.');
+				$this->jobs->remote();
+			} else {
+				if ($toUpload) {
+					$this->progress->log(date('Y-m-d H:i:s') . ': File moving.');
+					$this->deployer->moveFiles($toUpload);
+				}
 
-		// Move Deployed File List
-		if (!$this->jobs->hasRemote() && ($toUpload || $toDelete)) {
-			$this->deployer->moveDeployedList();
-		}
-
-		// Delete not tracked files
-		if (!$this->jobs->hasRemote()) {
-			if ($toDelete) {
-				$this->progress->log(date('Y-m-d H:i:s') . ': File deletion.');
-				$this->deployer->deleteFiles($toDelete);
+				$this->progress->log(sprintf('%d files and directories moved from temp to production.', count($toUpload)));
+				$this->progress->log('');
 			}
 
-			$this->progress->log(sprintf('%d files and directories deleted.', count($toDelete)));
-			$this->progress->log('');
+			// Move Deployed File List
+			if (!$this->jobs->hasRemote() && ($toUpload || $toDelete)) {
+				$this->deployer->moveDeployedList();
+			}
+
+			// Delete not tracked files
+			if (!$this->jobs->hasRemote()) {
+				if ($toDelete) {
+					$this->progress->log(date('Y-m-d H:i:s') . ': File deletion.');
+					$this->deployer->deleteFiles($toDelete);
+				}
+
+				$this->progress->log(sprintf('%d files and directories deleted.', count($toDelete)));
+				$this->progress->log('');
+			}
+
+			// Clean .deploy directory
+			if (!$this->jobs->hasRemote() && ($toUpload || $toDelete)) {
+				$this->deployer->clean();
+			}
+
+			$this->jobs->finish();
 		}
 
-		// Clean .deploy directory
-		if (!$this->jobs->hasRemote() && ($toUpload || $toDelete)) {
-			$this->deployer->clean();
-		}
-
-		$this->jobs->finish();
 		$this->progress->log(date('Y-m-d H:i:s') . ': Everything done.');
 	}
 

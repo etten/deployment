@@ -50,7 +50,14 @@ class DeploymentCommand extends Console\Command\Command
 			->setDescription('Deploys the application on remote server given by config.')
 			->addOption('config', 'c', Console\Input\InputOption::VALUE_REQUIRED, 'Path to config file.')
 			->addOption('test', 't', Console\Input\InputOption::VALUE_NONE, 'Does not really upload or delete files, just gets list of them.')
-			->addOption('force', 'f', Console\Input\InputOption::VALUE_NONE, 'Force deploy. When another is in progress, continue anyway.');
+			->addOption('force', 'f', Console\Input\InputOption::VALUE_NONE, 'Force deploy. When another is in progress, continue anyway.')
+			->addOption(
+				'upload-only',
+				'u',
+				Console\Input\InputOption::VALUE_NONE,
+				'Upload files to temporary directory only. ' .
+				'Not call server-side scripts and do not replace and delete remote files.'
+			);
 	}
 
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
@@ -74,6 +81,7 @@ class DeploymentCommand extends Console\Command\Command
 
 		$deployment->setTestOnly($input->getOption('test'));
 		$deployment->setForced($input->getOption('force'));
+		$deployment->setUploadOnly($input->getOption('upload-only'));
 
 		$deployment->run();
 	}
