@@ -91,11 +91,13 @@ class Runner
 		$this->progress->log('');
 		$this->jobs->start();
 
+		$toUpload = [];
+		$toDelete = [];
+
 		if ($this->remoteOnly) {
 			if (!$this->jobs->hasRemote()) {
-				throw new Exception('"Remote-only" option is available only when "remote" (onRemote) job is set.');
+				throw new Exception('"Remote-only" option is available only when at least one "onRemote" job is set.');
 			}
-
 		} else {
 			// Collect files
 			$localFiles = $this->deployer->findLocalFiles();
@@ -156,13 +158,13 @@ class Runner
 		}
 
 		if (!$this->uploadOnly) {
-			// Move uploaded files
 			$this->jobs->beforeMove();
 
 			if ($this->jobs->hasRemote()) {
 				$this->progress->log(date('Y-m-d H:i:s') . ': Remote script launching.');
 				$this->jobs->remote();
 			} else {
+				// Move uploaded files
 				if ($toUpload) {
 					$this->progress->log(date('Y-m-d H:i:s') . ': File moving.');
 					$this->deployer->moveFiles($toUpload);
@@ -170,15 +172,13 @@ class Runner
 
 				$this->progress->log(sprintf('%d files and directories moved from temp to production.', count($toUpload)));
 				$this->progress->log('');
-			}
 
-			// Move Deployed File List
-			if (!$this->jobs->hasRemote() && ($toUpload || $toDelete)) {
-				$this->deployer->moveDeployedList();
-			}
+				// Move Deployed File List
+				if ($toUpload || $toDelete) {
+					$this->deployer->moveDeployedList();
+				}
 
-			// Delete not tracked files
-			if (!$this->jobs->hasRemote()) {
+				// Delete not tracked files
 				if ($toDelete) {
 					$this->progress->log(date('Y-m-d H:i:s') . ': File deletion.');
 					$this->deployer->deleteFiles($toDelete);
@@ -186,11 +186,11 @@ class Runner
 
 				$this->progress->log(sprintf('%d files and directories deleted.', count($toDelete)));
 				$this->progress->log('');
-			}
 
-			// Clean .deploy directory
-			if (!$this->jobs->hasRemote() && ($toUpload || $toDelete)) {
-				$this->deployer->clean();
+				// Clean .deploy directory
+				if ($toUpload || $toDelete) {
+					$this->deployer->clean();
+				}
 			}
 
 			$this->jobs->finish();
