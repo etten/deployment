@@ -83,7 +83,7 @@ class Runner
 
 	public function run()
 	{
-		if (!$this->forced || $this->remoteOnly) {
+		if (!$this->forced && !$this->remoteOnly) {
 			$this->deployer->checkPrevious();
 		}
 
@@ -95,7 +95,11 @@ class Runner
 		$toDelete = [];
 
 		if ($this->remoteOnly) {
-			if (!$this->jobs->hasRemote()) {
+			if ($this->jobs->hasRemote()) {
+				$this->progress->log('PROCESSING REMOTE FILES ONLY.');
+				$this->progress->log('Nothing new will be uploaded.');
+				$this->progress->log('');
+			} else {
 				throw new Exception('"Remote-only" option is available only when at least one "onRemote" job is set.');
 			}
 		} else {
