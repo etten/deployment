@@ -26,5 +26,5 @@ script:
   # Run PHP CodeSniffer
   - vendor/bin/phpcs --standard=vendor/etten/codestyle/Etten/ruleset.xml -nsp src tests
 
-  # Run PHPUnit
-  - vendor/bin/phpunit --log-junit shippable/testresults/junit.xml --coverage-xml shippable/codecoverage tests
+  # Run PHPUnit (with XDebug enabled)
+  - php -d$XDEBUG_EXT vendor/bin/phpunit --log-junit shippable/testresults/junit.xml --coverage-xml shippable/codecoverage tests
