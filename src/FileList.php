@@ -16,7 +16,7 @@ class FileList
 		return file_put_contents($file, gzdeflate($content, 9));
 	}
 
-	public function read(string $file):array
+	public function read(string $file) :array
 	{
 		$content = gzinflate(file_get_contents($file));
 		return json_decode($content, TRUE);

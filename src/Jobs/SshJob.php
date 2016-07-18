@@ -24,7 +24,7 @@ class SshJob extends AbstractJob
 		$this->command = $command;
 	}
 
-	public function getName():string
+	public function getName() :string
 	{
 		return 'ssh ' . $this->command;
 	}

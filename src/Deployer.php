@@ -56,12 +56,12 @@ class Deployer
 		}
 	}
 
-	public function findLocalFiles():array
+	public function findLocalFiles() :array
 	{
 		return $this->collector->collect();
 	}
 
-	public function findDeployedFiles():array
+	public function findDeployedFiles() :array
 	{
 		if ($this->server->exists($this->config['deployedFile'])) {
 			$tempFilePath = TempFile::create();
@@ -74,7 +74,7 @@ class Deployer
 		return $ftpDeployment->findDeployedFiles();
 	}
 
-	public function filterFilesToDeploy(array $local, array $deployed):array
+	public function filterFilesToDeploy(array $local, array $deployed) :array
 	{
 		return array_filter($local, function ($value, $key) use ($deployed) {
 			if (!isset($deployed[$key])) {
@@ -85,7 +85,7 @@ class Deployer
 		}, ARRAY_FILTER_USE_BOTH);
 	}
 
-	public function filterFilesToDelete(array $local, array $deployed):array
+	public function filterFilesToDelete(array $local, array $deployed) :array
 	{
 		return array_diff_key($deployed, $local);
 	}
@@ -186,7 +186,7 @@ class Deployer
 		);
 	}
 
-	private function getTempPath(string $path):string
+	private function getTempPath(string $path) :string
 	{
 		return $this->mergePaths($this->config['temp'], $path);
 	}

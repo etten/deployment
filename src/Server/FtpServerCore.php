@@ -33,7 +33,7 @@ class FtpServerCore implements Server
 		$this->config = array_merge($this->config, $config);
 	}
 
-	public function exists(string $remotePath):bool
+	public function exists(string $remotePath) :bool
 	{
 		if ($this->isDirectory($remotePath)) {
 			return $this->isDirectoryExists($remotePath);
@@ -86,7 +86,7 @@ class FtpServerCore implements Server
 		}
 	}
 
-	private function listDirectory(string $path):array
+	private function listDirectory(string $path) :array
 	{
 		$list = $this->ftp('nlist', [$path]);
 
@@ -232,7 +232,7 @@ class FtpServerCore implements Server
 	private function protect(callable $command, array $args = [])
 	{
 		$errorHandler = function ($severity, $message) {
-			if (preg_match('~^\w+\(\):\s*(.+)~', $message, $m)) {
+			if (preg_match('~^\w+\(\) :\s*(.+)~', $message, $m)) {
 				$message = $m[1];
 			}
 
@@ -248,12 +248,12 @@ class FtpServerCore implements Server
 		}
 	}
 
-	private function isDirectory(string $path):bool
+	private function isDirectory(string $path) :bool
 	{
 		return substr($path, -1) === '/';
 	}
 
-	private function isDirectoryExists(string $path):bool
+	private function isDirectoryExists(string $path) :bool
 	{
 		$currentDir = $this->ftp('pwd');
 
@@ -282,7 +282,7 @@ class FtpServerCore implements Server
 		return $exists;
 	}
 
-	private function isFileExists(string $path):bool
+	private function isFileExists(string $path) :bool
 	{
 		$tempFilePath = TempFile::create();
 

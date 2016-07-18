@@ -38,7 +38,7 @@ class FileCollector implements Collector
 	/**
 	 * @return string Full local base path.
 	 */
-	public function basePath():string
+	public function basePath() :string
 	{
 		return $this->basePath;
 	}
@@ -51,7 +51,7 @@ class FileCollector implements Collector
 	/**
 	 * @return array [relativePath => hash]
 	 */
-	public function collect():array
+	public function collect() :array
 	{
 		$files = $this->collectRecursively('');
 		$this->progress->log('');
@@ -59,7 +59,7 @@ class FileCollector implements Collector
 		return $files;
 	}
 
-	private function collectRecursively($directory = ''):array
+	private function collectRecursively($directory = '') :array
 	{
 		$this->progress->log(sprintf('Checking %s', $directory ?: '/'));
 
@@ -105,7 +105,7 @@ class FileCollector implements Collector
 	 * @param string $file
 	 * @return string
 	 */
-	private function hashFile(string $file):string
+	private function hashFile(string $file) :string
 	{
 		if (filesize($file) > 5e6) {
 			return md5_file($file);
@@ -126,7 +126,7 @@ class FileCollector implements Collector
 	 * @param string $name
 	 * @return bool
 	 */
-	private function isIgnored(string $name):bool
+	private function isIgnored(string $name) :bool
 	{
 		$isIgnored = FALSE;
 		$path = explode('/', ltrim($name, '/'));
@@ -159,7 +159,7 @@ class FileCollector implements Collector
 		return $isIgnored;
 	}
 
-	private function normalizePath(string $path):string
+	private function normalizePath(string $path) :string
 	{
 		return strtr($path, '\\', '/');
 	}

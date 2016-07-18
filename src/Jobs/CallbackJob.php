@@ -22,7 +22,7 @@ class CallbackJob extends AbstractJob
 		$this->closure = $closure;
 	}
 
-	public function getName():string
+	public function getName() :string
 	{
 		return $this->name;
 	}

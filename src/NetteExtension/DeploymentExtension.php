@@ -160,7 +160,7 @@ class DeploymentExtension extends DI\CompilerExtension
 		return $jobs;
 	}
 
-	private function expandJob(string $job, string $environment, array $config):DI\Statement
+	private function expandJob(string $job, string $environment, array $config) :DI\Statement
 	{
 		$isFtp = $this->isFtp($config);
 
@@ -208,7 +208,7 @@ class DeploymentExtension extends DI\CompilerExtension
 		throw new \RuntimeException('Job was not recognized.');
 	}
 
-	private function isFtp(array $config):bool
+	private function isFtp(array $config) :bool
 	{
 		return empty($config['ssh']['host']) && !empty($config['ftp']['host']);
 	}

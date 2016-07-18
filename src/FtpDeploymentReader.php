@@ -20,7 +20,7 @@ class FtpDeploymentReader
 		$this->server = $server;
 	}
 
-	public function findDeployedFiles():array
+	public function findDeployedFiles() :array
 	{
 		if ($this->server->exists('/.htdeployment')) {
 			$tempFilePath = TempFile::create();
@@ -31,7 +31,7 @@ class FtpDeploymentReader
 		return [];
 	}
 
-	private function read(string $file):array
+	private function read(string $file) :array
 	{
 		$content = gzinflate(file_get_contents($file));
 

@@ -21,7 +21,7 @@ class FileRenameJob extends ServerFileJob
 		$this->destination = $destination;
 	}
 
-	public function getName():string
+	public function getName() :string
 	{
 		return implode(' ', [
 			preg_replace('~Job$~', '', (new \ReflectionClass($this))->getShortName()),

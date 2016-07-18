@@ -16,7 +16,7 @@ interface Server
 	 * @param string $remotePath
 	 * @return bool
 	 */
-	public function exists(string $remotePath):bool;
+	public function exists(string $remotePath) :bool;
 
 	/**
 	 * Reads the remote file and saves it locally.

@@ -24,7 +24,7 @@ abstract class ServerFileJob extends AbstractJob
 		$this->source = $source;
 	}
 
-	public function getName():string
+	public function getName() :string
 	{
 		return implode(' ', [
 			preg_replace('~Job$~', '', (new \ReflectionClass($this))->getShortName()),

@@ -21,7 +21,7 @@ class FtpServer extends ServerProxy
 		'path' => '/',
 	];
 
-	protected function createServer():Server
+	protected function createServer() :Server
 	{
 		return new FtpServerCore($this->config);
 	}

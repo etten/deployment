@@ -22,7 +22,7 @@ class SshServer extends ServerProxy
 	/** @var SshServer */
 	protected $server;
 
-	protected function createServer():Server
+	protected function createServer() :Server
 	{
 		return new SshServerCore($this->config);
 	}

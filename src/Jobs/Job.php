@@ -14,7 +14,7 @@ interface Job
 
 	public function setProgress(Progress $progress);
 
-	public function getName():string;
+	public function getName() :string;
 
 	public function run();
 

@@ -37,7 +37,7 @@ class Progress implements Deployment\Progress
 		$this->output->writeln($message);
 	}
 
-	public function ask(string $message, bool $default = TRUE):bool
+	public function ask(string $message, bool $default = TRUE) :bool
 	{
 		sleep(1); // Workaround for Symfony QuestionHelper concurrency.
 		$helper = $this->command->getHelper('question');

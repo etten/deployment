@@ -13,13 +13,13 @@ interface Collector
 	/**
 	 * @return string Full local base path.
 	 */
-	public function basePath():string;
+	public function basePath() :string;
 
 	public function setProgress(Progress $progress);
 
 	/**
 	 * @return array [relativePath => hash]
 	 */
-	public function collect():array;
+	public function collect() :array;
 
 }

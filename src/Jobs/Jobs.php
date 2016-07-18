@@ -71,7 +71,7 @@ class Jobs
 		$this->invoke($this->onFinish);
 	}
 
-	public function hasRemote():bool
+	public function hasRemote() :bool
 	{
 		return !!$this->onRemote;
 	}

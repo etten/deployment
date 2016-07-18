@@ -30,7 +30,7 @@ class SshServerCore implements Server
 		$this->config = array_merge($this->config, $config);
 	}
 
-	public function exists(string $remotePath):bool
+	public function exists(string $remotePath) :bool
 	{
 		return file_exists($this->sftpPath($remotePath));
 	}
@@ -69,7 +69,7 @@ class SshServerCore implements Server
 	 * @param string $command
 	 * @return string
 	 */
-	public function exec(string $command):string
+	public function exec(string $command) :string
 	{
 		// Support remote exit code
 		// @see http://stackoverflow.com/a/10514974
@@ -96,7 +96,7 @@ class SshServerCore implements Server
 		}
 	}
 
-	private function isDirectory(string $path):bool
+	private function isDirectory(string $path) :bool
 	{
 		return substr($path, -1) === '/';
 	}
@@ -147,12 +147,12 @@ class SshServerCore implements Server
 		return $this->protect('ssh2_sftp_' . $command, $args);
 	}
 
-	private function escape(string $command):string
+	private function escape(string $command) :string
 	{
 		return escapeshellcmd($command);
 	}
 
-	private function sftpPath(string $path):string
+	private function sftpPath(string $path) :string
 	{
 		$this->connectSftp();
 		return 'ssh2.sftp://' . $this->sftp . $path;
@@ -195,7 +195,7 @@ class SshServerCore implements Server
 	private function protect(callable $command, array $args = [])
 	{
 		$errorHandler = function ($severity, $message) {
-			if (preg_match('~^\w+\(\):\s*(.+)~', $message, $m)) {
+			if (preg_match('~^\w+\(\) :\s*(.+)~', $message, $m)) {
 				$message = $m[1];
 			}
 

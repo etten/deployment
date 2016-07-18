@@ -24,7 +24,7 @@ abstract class ServerProxy implements Server
 		$this->server = $this->createServer();
 	}
 
-	public function exists(string $remotePath):bool
+	public function exists(string $remotePath) :bool
 	{
 		return $this->server->exists(
 			$this->getRemotePath($remotePath)
@@ -62,9 +62,9 @@ abstract class ServerProxy implements Server
 		);
 	}
 
-	abstract protected function createServer():Server;
+	abstract protected function createServer() :Server;
 
-	protected function getRemotePath(string $path):string
+	protected function getRemotePath(string $path) :string
 	{
 		return rtrim($this->config['path'], '/') . $path;
 	}

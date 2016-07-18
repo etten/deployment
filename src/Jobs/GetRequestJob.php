@@ -18,7 +18,7 @@ class GetRequestJob extends AbstractJob
 		$this->url = $url;
 	}
 
-	public function getName():string
+	public function getName() :string
 	{
 		return $this->url;
 	}
