@@ -41,44 +41,24 @@ class Runner
 		$this->deployer = $deployer;
 	}
 
-	/**
-	 * @param boolean $testOnly
-	 * @return $this
-	 */
 	public function setTestOnly(bool $testOnly)
 	{
 		$this->testOnly = $testOnly;
-		return $this;
 	}
 
-	/**
-	 * @param boolean $forced
-	 * @return $this
-	 */
 	public function setForced(bool $forced)
 	{
 		$this->forced = $forced;
-		return $this;
 	}
 
-	/**
-	 * @param bool $uploadOnly
-	 * @return $this
-	 */
 	public function setUploadOnly(bool $uploadOnly)
 	{
 		$this->uploadOnly = $uploadOnly;
-		return $this;
 	}
 
-	/**
-	 * @param bool $remoteOnly
-	 * @return $this
-	 */
 	public function setRemoteOnly(bool $remoteOnly)
 	{
 		$this->remoteOnly = $remoteOnly;
-		return $this;
 	}
 
 	public function run()

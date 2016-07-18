@@ -43,14 +43,9 @@ class FileCollector implements Collector
 		return $this->basePath;
 	}
 
-	/**
-	 * @param Progress $progress
-	 * @return $this
-	 */
 	public function setProgress(Progress $progress)
 	{
 		$this->progress = $progress;
-		return $this;
 	}
 
 	/**

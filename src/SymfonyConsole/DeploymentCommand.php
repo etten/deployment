@@ -24,24 +24,14 @@ class DeploymentCommand extends Console\Command\Command
 		parent::__construct($name);
 	}
 
-	/**
-	 * @param Deployment\Jobs\Jobs $jobs
-	 * @return $this
-	 */
 	public function setJobs(Deployment\Jobs\Jobs $jobs)
 	{
 		$this->jobs = $jobs;
-		return $this;
 	}
 
-	/**
-	 * @param Deployment\Deployer $deployer
-	 * @return $this
-	 */
 	public function setDeployer(Deployment\Deployer $deployer)
 	{
 		$this->deployer = $deployer;
-		return $this;
 	}
 
 	protected function configure()
